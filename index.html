@@ -7,28 +7,28 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap');
     body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-    code, pre { font-family: 'Fira Code', monospace; }
+    code, pre, .font-mono { font-family: 'Fira Code', monospace; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
   <!-- Header / Navigation -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('learn')">
         <div class="bg-indigo-600 text-white p-2 rounded-lg shadow-sm">
-          <i class="fa-solid me-0.5 fa-shield-halved text-xl"></i>
+          <i class="fa-solid fa-shield-halved text-xl"></i>
         </div>
-        <span class="font-bold text-xl tracking-tight text-slate-900">SQLi Academy</span>
+        <span class="font-bold text-xl tracking-tight text-slate-900">SQLi Lab Academy</span>
       </div>
       <nav class="hidden md:flex space-x-1 text-sm font-medium">
-        <button onclick="switchTab('learn')" id="nav-learn" class="px-3 py-2 rounded-md transition text-indigo-600 bg-indigo-50 font-semibold">教學導覽</button>
-        <button onclick="switchTab('sandbox')" id="nav-sandbox" class="px-3 py-2 rounded-md transition text-slate-600 hover:text-slate-900 hover:bg-slate-100">互動沙盒</button>
-        <button onclick="switchTab('defense')" id="nav-defense" class="px-3 py-2 rounded-md transition text-slate-600 hover:text-slate-900 hover:bg-slate-100">防禦語法</button>
-        <button onclick="switchTab('quiz')" id="nav-quiz" class="px-3 py-2 rounded-md transition text-slate-600 hover:text-slate-900 hover:bg-slate-100">隨機測驗</button>
-        <button onclick="switchTab('leaderboard')" id="nav-leaderboard" class="px-3 py-2 rounded-md transition text-slate-600 hover:text-slate-900 hover:bg-slate-100">成績與解答</button>
+        <button onclick="switchTab('learn')" id="nav-learn" class="px-3.5 py-2 rounded-lg transition text-indigo-600 bg-indigo-50 font-semibold">教學導覽</button>
+        <button onclick="switchTab('sandbox')" id="nav-sandbox" class="px-3.5 py-2 rounded-lg transition text-slate-600 hover:text-slate-900 hover:bg-slate-100">互動沙盒</button>
+        <button onclick="switchTab('defense')" id="nav-defense" class="px-3.5 py-2 rounded-lg transition text-slate-600 hover:text-slate-900 hover:bg-slate-100">防禦範例</button>
+        <button onclick="switchTab('quiz')" id="nav-quiz" class="px-3.5 py-2 rounded-lg transition text-slate-600 hover:text-slate-900 hover:bg-slate-100">線上測驗</button>
+        <button onclick="switchTab('solutions')" id="nav-solutions" class="px-3.5 py-2 rounded-lg transition text-slate-600 hover:text-slate-900 hover:bg-slate-100">解答與複習區</button>
       </nav>
     </div>
   </header>
@@ -36,53 +36,53 @@
   <!-- Main Content Area -->
   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- Section 1: Concept Learning -->
+    <!-- TAB 1: Concept Learning -->
     <section id="tab-learn" class="space-y-8">
-      <div class="bg-gradient-to-r from-indigo-900 to-slate-900 rounded-2xl p-8 text-white shadow-xl">
-        <span class="bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full">Web Security 101</span>
-        <h1 class="text-3xl font-extrabold mt-4 mb-2 sm:text-4xl">什麼是 SQL Injection（SQL 注入攻擊）？</h1>
+      <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-8 text-white shadow-xl">
+        <span class="bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full">Web Security Fundamentals</span>
+        <h1 class="text-3xl font-extrabold mt-4 mb-2 sm:text-4xl">SQL Injection（SQL 注入攻擊）原理解析</h1>
         <p class="text-slate-300 max-w-3xl leading-relaxed">
-          SQL Injection 發生在當應用程式將「使用者輸入的資料」未經妥善過濾，就直接與「SQL 資料庫查詢指令」進行字串拼接時。攻擊者藉由輸入惡意 SQL 語法，破壞原有的查詢結構，從而存取、修改或刪除資料庫中的資料。
+          當應用程式將使用者輸入的資料未經檢查，直接「拼接」到 SQL 資料庫指令中時，攻擊者可輸入特定語法，改變原本 SQL 的解析邏輯，進而控制資料庫。
         </p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-white rounded-xl p-6 border border-red-200 shadow-sm relative overflow-hidden">
-          <div class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-bl">漏洞示範</div>
-          <h3 class="text-lg font-bold text-red-900 mb-2">❌ 不安全的作法：動態字串拼接</h3>
-          <p class="text-slate-600 text-sm mb-4">將使用者傳入的變數直推拼接到 SQL 指令中，使輸入變成指令的一部分。</p>
-          <pre class="bg-slate-900 text-red-400 p-4 rounded-lg text-sm overflow-x-auto border border-red-900/30"><code>SELECT * FROM users 
+        <div class="bg-white rounded-xl p-6 border border-red-200 shadow-sm relative">
+          <div class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">漏洞機制</div>
+          <h3 class="text-lg font-bold text-red-900 mb-2">❌ 動態字串拼接 (Dynamic SQL)</h3>
+          <p class="text-slate-600 text-sm mb-4">使用者輸入變成 SQL 指令結構的一部分，引號與運算子被資料庫引擎解析為指令。</p>
+          <pre class="bg-slate-900 text-red-400 p-4 rounded-lg text-xs overflow-x-auto border border-red-900/30"><code>SELECT * FROM users 
 WHERE username = '<span class="text-yellow-300">' OR '1'='1</span>' 
 AND password = '...';</code></pre>
-          <div class="mt-4 text-xs text-slate-500 bg-red-50 p-3 rounded-lg border border-red-100">
-            <strong>風險：</strong> 輸入 <code>' OR '1'='1</code> 會破壞邏輯判斷，因為 <code>'1'='1'</code> 永遠為真，可直接繞過密碼驗證！
+          <div class="mt-4 text-xs text-slate-600 bg-red-50 p-3 rounded-lg border border-red-100">
+            <strong>核心危害：</strong> <code>'1'='1'</code> 恆為真，搭配 <code>OR</code> 邏輯直接忽略後續密碼比對，獲得未授權存取。
           </div>
         </div>
 
-        <div class="bg-white rounded-xl p-6 border border-emerald-200 shadow-sm relative overflow-hidden">
-          <div class="absolute top-0 right-0 bg-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-bl">安全標準</div>
-          <h3 class="text-lg font-bold text-emerald-900 mb-2">✅ 正確的防禦：參數化查詢 (Prepared Statement)</h3>
-          <p class="text-slate-600 text-sm mb-4">將「指令結構」與「資料內容」完全分離，資料庫會將傳入變數純粹當作資料處理。</p>
-          <pre class="bg-slate-900 text-emerald-400 p-4 rounded-lg text-sm overflow-x-auto border border-emerald-900/30"><code>SELECT * FROM users 
+        <div class="bg-white rounded-xl p-6 border border-emerald-200 shadow-sm relative">
+          <div class="absolute top-0 right-0 bg-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">最佳防禦</div>
+          <h3 class="text-lg font-bold text-emerald-900 mb-2">✅ 參數化查詢 (Prepared Statements)</h3>
+          <p class="text-slate-600 text-sm mb-4">資料庫先將 SQL 語法編譯完成，隨後輸入的變數僅會被當作純「資料值 (Literal Value)」處理。</p>
+          <pre class="bg-slate-900 text-emerald-400 p-4 rounded-lg text-xs overflow-x-auto border border-emerald-900/30"><code>SELECT * FROM users 
 WHERE username = <span class="text-yellow-300">?</span> 
 AND password = <span class="text-yellow-300">?</span>;</code></pre>
-          <div class="mt-4 text-xs text-slate-500 bg-emerald-50 p-3 rounded-lg border border-emerald-100">
-            <strong>效益：</strong> 即使輸入包含 <code>' OR '1'='1</code>，資料庫也會精確比對使用者名稱是否「字面等於」該字串，不會執行注入邏輯。
+          <div class="mt-4 text-xs text-slate-600 bg-emerald-50 p-3 rounded-lg border border-emerald-100">
+            <strong>防禦效益：</strong> 即使輸入包含包含單引號與 <code>OR</code> 關鍵字，資料庫只會尋找字面完全相同的使用者名稱，無法進行注入。
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Section 2: Interactive Sandbox -->
+    <!-- TAB 2: Advanced Interactive Sandbox -->
     <section id="tab-sandbox" class="hidden space-y-6">
       <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-6 mb-6">
           <div>
-            <h2 class="text-xl font-bold text-slate-900">SQL 注入攻擊模擬沙盒</h2>
-            <p class="text-slate-500 text-sm mt-1">選擇模式並輸入測試語法，觀察 SQL 查詢與資料庫回應結果。</p>
+            <h2 class="text-xl font-bold text-slate-900">SQL 注入多情境模擬沙盒</h2>
+            <p class="text-slate-500 text-sm mt-1">選擇不同情境，觀察動態拼接與參數化查詢在語法樹 (AST Token) 與資料庫執行的差異。</p>
           </div>
           <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200 self-start md:self-auto">
-            <button id="mode-vuln" onclick="setSandboxMode('vulnerable')" class="px-4 py-2 text-xs font-semibold rounded-md bg-white text-red-600 shadow-sm">❌ 漏洞模式 (Dynamic)</button>
+            <button id="mode-vuln" onclick="setSandboxMode('vulnerable')" class="px-4 py-2 text-xs font-semibold rounded-md bg-white text-red-600 shadow-sm">❌ 漏洞模式 (Dynamic SQL)</button>
             <button id="mode-safe" onclick="setSandboxMode('secure')" class="px-4 py-2 text-xs font-semibold rounded-md text-slate-600 hover:text-slate-900">✅ 安全模式 (Prepared Statement)</button>
           </div>
         </div>
@@ -90,59 +90,91 @@ AND password = <span class="text-yellow-300">?</span>;</code></pre>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">測試情境</label>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">攻擊與測試情境</label>
               <select id="sb-scenario" onchange="runSandbox()" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                <option value="login">登入頁面身分驗證 (Login Bypass)</option>
-                <option value="search">產品搜尋引擎 (Data Extraction)</option>
+                <option value="login">1. 身分驗證繞過 (Authentication Bypass)</option>
+                <option value="union">2. UNION 聯合查詢 (Data Exfiltration)</option>
+                <option value="blind">3. 布林盲注 (Boolean-based Blind SQLi)</option>
+                <option value="orderby">4. ORDER BY 動態排序防禦</option>
               </select>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">帳號 / 關鍵字輸入</label>
-              <input type="text" id="sb-input" value="' OR '1'='1" oninput="runSandbox()" placeholder="輸入內容..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 font-mono text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+              <label class="block text-sm font-semibold text-slate-700 mb-1">使用者輸入 (Payload)</label>
+              <input type="text" id="sb-input" value="' OR '1'='1" oninput="runSandbox()" placeholder="輸入語法..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 font-mono text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
             </div>
 
             <div>
-              <span class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">快速載入範例 Payload：</span>
+              <span class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">快速載入預設 Payload：</span>
               <div class="flex flex-wrap gap-2">
-                <button onclick="setPayload('admin')" class="px-2.5 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded text-slate-700 font-mono">admin (正常)</button>
+                <button onclick="setPayload('admin')" class="px-2.5 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded font-mono text-slate-700">admin (正常)</button>
                 <button onclick="setPayload('\' OR \'1\'=\'1')" class="px-2.5 py-1 text-xs bg-red-100 hover:bg-red-200 text-red-800 rounded font-mono">' OR '1'='1</button>
                 <button onclick="setPayload('admin\'--')" class="px-2.5 py-1 text-xs bg-red-100 hover:bg-red-200 text-red-800 rounded font-mono">admin'--</button>
+                <button onclick="setPayload('\' UNION SELECT id, username, password FROM users--')" class="px-2.5 py-1 text-xs bg-red-100 hover:bg-red-200 text-red-800 rounded font-mono">UNION SELECT</button>
               </div>
             </div>
 
-            <div class="pt-2">
-              <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">即時組裝 SQL 指令：</label>
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">即時 SQL 指令預覽：</label>
               <div id="sb-sql-display" class="bg-slate-900 text-indigo-300 p-4 rounded-lg font-mono text-xs overflow-x-auto leading-relaxed border border-slate-800">
-                SELECT * FROM users WHERE ...
+                <!-- SQL string -->
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">語法解析 Token 拆解：</label>
+              <div id="sb-tokens-display" class="flex flex-wrap gap-1.5 bg-slate-100 p-3 rounded-lg border border-slate-200 min-h-[48px]">
+                <!-- Token Pills -->
               </div>
             </div>
           </div>
 
-          <!-- Result Panel -->
-          <div class="bg-slate-50 rounded-lg border border-slate-200 p-4 flex flex-col">
-            <h3 class="text-sm font-bold text-slate-700 mb-3 flex items-center justify-between">
-              <span>模擬執行結果</span>
-              <span id="sb-status-badge" class="px-2 py-0.5 rounded text-xs font-bold bg-slate-200 text-slate-700">準備就緒</span>
-            </h3>
+          <!-- Sandbox DB Execution & Memory View -->
+          <div class="bg-slate-50 rounded-xl border border-slate-200 p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-bold text-slate-800">模擬資料庫與記憶體快照</h3>
+                <span id="sb-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-200 text-slate-700">狀態：就緒</span>
+              </div>
 
-            <div id="sb-results-box" class="flex-grow bg-white rounded border border-slate-200 p-3 overflow-y-auto text-xs font-mono space-y-2 max-h-[250px]">
-              <!-- Execution output -->
+              <!-- DB Table Visualizer -->
+              <div class="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm mb-4">
+                <div class="bg-slate-100 px-3 py-1.5 border-b border-slate-200 text-xs font-semibold text-slate-600 flex justify-between">
+                  <span>Database Table: <code class="text-indigo-600">users</code></span>
+                  <span>Row Count: 3</span>
+                </div>
+                <table class="w-full text-left text-xs">
+                  <thead>
+                    <tr class="bg-slate-50 border-b text-slate-500">
+                      <th class="p-2">id</th>
+                      <th class="p-2">username</th>
+                      <th class="p-2">role</th>
+                    </tr>
+                  </thead>
+                  <tbody id="sb-db-rows" class="divide-y divide-slate-100 font-mono">
+                    <!-- DB Row items -->
+                  </tbody>
+                </table>
+              </div>
+
+              <div id="sb-output-log" class="bg-slate-900 text-slate-200 p-3 rounded-lg text-xs font-mono space-y-1 mb-4 border border-slate-800">
+                <!-- Log output -->
+              </div>
             </div>
 
-            <div id="sb-analysis" class="mt-4 bg-indigo-50 border border-indigo-100 rounded-lg p-3 text-xs text-indigo-900 leading-relaxed">
-              分析訊息呈現於此...
+            <div id="sb-analysis" class="bg-indigo-50 border border-indigo-100 rounded-lg p-3 text-xs text-indigo-900 leading-relaxed">
+              分析報告展延區...
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Section 3: Defense Code Reference -->
+    <!-- TAB 3: Defense Code Examples -->
     <section id="tab-defense" class="hidden space-y-6">
       <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-        <h2 class="text-xl font-bold text-slate-900 mb-2">主流程式語言參數化查詢 (Prepared Statements) 範例</h2>
-        <p class="text-slate-500 text-sm mb-6">防止 SQL Injection 最有效的方式即是在後端程式碼中全面採用參數化查詢。</p>
+        <h2 class="text-xl font-bold text-slate-900 mb-2">主流程式語言安全防禦語法示範</h2>
+        <p class="text-slate-500 text-sm mb-6">以下範例說明如何在常見開發語言中全面採用「參數化查詢 (Prepared Statements)」。</p>
 
         <div class="border-b border-slate-200 flex space-x-4 mb-6">
           <button onclick="setDefenseTab('python')" id="dtab-python" class="pb-2 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600">Python</button>
@@ -151,53 +183,37 @@ AND password = <span class="text-yellow-300">?</span>;</code></pre>
           <button onclick="setDefenseTab('java')" id="dtab-java" class="pb-2 text-sm font-bold text-slate-500 hover:text-slate-800">Java</button>
         </div>
 
-        <div id="dcode-python" class="space-y-4">
-          <p class="text-sm text-slate-600">使用 <code>sqlite3</code> 或 <code>psycopg2</code> 時，使用 <code>?</code> 或 <code>%s</code> 占位符傳入參數 Tuple：</p>
-          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg text-sm overflow-x-auto border border-slate-800"><code>import sqlite3
-
-conn = sqlite3.connect('database.db')
-cursor = conn.cursor()
-
-# ✅ 安全：將參數放入 Tuple 傳遞給 execute 方法
-username = user_input
-password = pass_input
-
+        <div id="dcode-python" class="space-y-3">
+          <p class="text-xs text-slate-600">使用 <code>sqlite3</code> 或 <code>psycopg2</code>，透過 <code>?</code> 或 <code>%s</code> 占位符將變數以 Tuple 傳入：</p>
+          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg text-xs overflow-x-auto border border-slate-800"><code># ✅ 安全：將使用者變數透過 Tuple 綁定
 cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
 user = cursor.fetchone()</code></pre>
         </div>
 
-        <div id="dcode-node" class="hidden space-y-4">
-          <p class="text-sm text-slate-600">使用 <code>mysql2</code> 套件時，傳入帶有 <code>?</code> 占位符與陣列參數：</p>
-          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg text-sm overflow-x-auto border border-slate-800"><code>const mysql = require('mysql2/promise');
-const connection = await mysql.createConnection({/* config */});
-
-// ✅ 安全：使用 execute 預處理查詢
+        <div id="dcode-node" class="hidden space-y-3">
+          <p class="text-xs text-slate-600">使用 <code>mysql2</code> 套件時，使用 <code>?</code> 陣列傳參：</p>
+          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg text-xs overflow-x-auto border border-slate-800"><code>// ✅ 安全：使用 execute 方法與預處理陣列
 const [rows] = await connection.execute(
   'SELECT * FROM users WHERE username = ? AND password = ?',
   [userInputUsername, userInputPassword]
 );</code></pre>
         </div>
 
-        <div id="dcode-php" class="hidden space-y-4">
-          <p class="text-sm text-slate-600">使用 <code>PDO</code> 延伸套件進行預編譯與綁定：</p>
-          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg text-sm overflow-x-auto border border-slate-800"><code>&lt;?php
-$stmt = $pdo->prepare('SELECT * FROM users WHERE username = :username AND password = :password');
-
-// ✅ 安全：綁定參數
-$stmt->execute([
-    'username' => $userInputUsername,
-    'password' => $userInputPassword
-]);
+        <div id="dcode-php" class="hidden space-y-3">
+          <p class="text-xs text-slate-600">使用 <code>PDO</code> 物件導向預處理：</p>
+          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg text-xs overflow-x-auto border border-slate-800"><code>&lt;?php
+// ✅ 安全：使用 prepare 與 execute 分離資料
+$stmt = $pdo->prepare('SELECT * FROM users WHERE username = :user AND password = :pass');
+$stmt->execute(['user' => $userInputUsername, 'pass' => $userInputPassword]);
 $user = $stmt->fetch();
 ?&gt;</code></pre>
         </div>
 
-        <div id="dcode-java" class="hidden space-y-4">
-          <p class="text-sm text-slate-600">使用 JDBC 的 <code>PreparedStatement</code>：</p>
-          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg text-sm overflow-x-auto border border-slate-800"><code>String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+        <div id="dcode-java" class="hidden space-y-3">
+          <p class="text-xs text-slate-600">使用 JDBC 的 <code>PreparedStatement</code>：</p>
+          <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg text-xs overflow-x-auto border border-slate-800"><code>// ✅ 安全：綁定參數
+String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
 PreparedStatement stmt = connection.prepareStatement(sql);
-
-// ✅ 安全：設定欄位參數
 stmt.setString(1, userInputUsername);
 stmt.setString(2, userInputPassword);
 ResultSet rs = stmt.executeQuery();</code></pre>
@@ -205,16 +221,16 @@ ResultSet rs = stmt.executeQuery();</code></pre>
       </div>
     </section>
 
-    <!-- Section 4: Quiz System -->
+    <!-- TAB 4: Quiz System (Private Score, Multiple Attempts) -->
     <section id="tab-quiz" class="hidden space-y-6">
-      <!-- Student Reg Window -->
+      <!-- Registration / Start Screen -->
       <div id="quiz-auth-card" class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 sm:p-8 max-w-xl mx-auto">
         <div class="text-center mb-6">
           <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold">
-            <i class="fa-solid fa-user-graduate"></i>
+            <i class="fa-solid fa-pen-to-square"></i>
           </div>
           <h2 class="text-2xl font-bold text-slate-900">SQL Injection 隨機線上測驗</h2>
-          <p class="text-slate-500 text-sm mt-1">請填寫基本資料開始測驗。題庫隨機抽取 10 題且選項隨機打亂。</p>
+          <p class="text-slate-500 text-sm mt-1">每次測驗由題庫隨機抽取 10 題。可重複多次測驗。</p>
         </div>
 
         <form id="quiz-user-form" onsubmit="startQuiz(event)" class="space-y-4">
@@ -233,24 +249,24 @@ ResultSet rs = stmt.executeQuery();</code></pre>
             </div>
           </div>
           <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-sm mt-2">
-            開始隨機測驗 (10 題)
+            開始測驗 (隨機 10 題)
           </button>
         </form>
       </div>
 
-      <!-- Quiz Window (Active) -->
+      <!-- Active Quiz Window -->
       <div id="quiz-window" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm p-6 sm:p-8 max-w-3xl mx-auto space-y-6">
         <div class="flex items-center justify-between border-b border-slate-200 pb-4">
-          <div class="text-sm font-semibold text-slate-600">
+          <div class="text-sm font-semibold text-slate-700">
             考生：<span id="quiz-display-user" class="text-indigo-600 font-bold"></span>
           </div>
           <div class="text-xs bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full font-bold">
-            進度：<span id="quiz-progress">1 / 10</span>
+            題目數：10 題
           </div>
         </div>
 
         <div id="quiz-questions-container" class="space-y-8">
-          <!-- Dynamically populated questions -->
+          <!-- Dynamically inserted questions -->
         </div>
 
         <div class="pt-6 border-t border-slate-200 flex justify-end">
@@ -259,90 +275,123 @@ ResultSet rs = stmt.executeQuery();</code></pre>
           </button>
         </div>
       </div>
+
+      <!-- Result Screen (Scores ONLY, NO question correctness leak) -->
+      <div id="quiz-result-card" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm p-8 max-w-xl mx-auto text-center space-y-6">
+        <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">
+          <i class="fa-solid fa-square-check"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900">測驗完成！</h2>
+          <p id="result-user-info" class="text-sm text-slate-500 mt-1"></p>
+        </div>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 grid grid-cols-2 gap-4">
+          <div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">測驗得分</div>
+            <div id="result-score" class="text-4xl font-extrabold text-indigo-600 mt-2">0 分</div>
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">答對題數</div>
+            <div id="result-count" class="text-4xl font-extrabold text-slate-800 mt-2">0 / 10</div>
+          </div>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 p-4 rounded-lg text-xs text-amber-800 leading-relaxed text-left flex items-start space-x-2">
+          <i class="fa-solid fa-circle-info text-amber-600 text-sm mt-0.5"></i>
+          <div>
+            <strong>說明：</strong> 本測驗僅顯示總分，不會對單一題目顯示對錯標籤，以維持公平性。如需參閱正確解答，請等待老師於「解答與複習區」開啟公佈。
+          </div>
+        </div>
+
+        <div class="flex gap-3 justify-center">
+          <button onclick="retakeQuiz()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-2.5 rounded-lg transition text-sm">
+            再次測驗 (重新抽題)
+          </button>
+          <button onclick="switchTab('solutions')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-6 py-2.5 rounded-lg transition text-sm">
+            前往解答區
+          </button>
+        </div>
+      </div>
     </section>
 
-    <!-- Section 5: Leaderboard and Solution Review -->
-    <section id="tab-leaderboard" class="hidden space-y-6">
+    <!-- TAB 5: Solution Review & Teacher Switch (No Public Leaderboard) -->
+    <section id="tab-solutions" class="hidden space-y-6">
       <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6 mb-6">
-          <div>
-            <h2 class="text-xl font-bold text-slate-900">成績榜單與題目解答區</h2>
-            <p class="text-slate-500 text-sm mt-1">管理考生成績紀錄，並可檢視全題庫詳細解答與分析。</p>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <button onclick="exportScoresJSON()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold px-3 py-2 rounded-lg transition">
-              <i class="fa-solid fa-download me-1"></i> 匯出成績 (JSON)
-            </button>
-            <label class="bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold px-3 py-2 rounded-lg transition cursor-pointer">
-              <i class="fa-solid fa-upload me-1"></i> 匯入資料
-              <input type="file" id="import-file" onchange="importScoresJSON(event)" accept=".json" class="hidden">
-            </label>
-            <button onclick="clearScores()" class="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-semibold px-3 py-2 rounded-lg transition">
-              <i class="fa-solid fa-trash me-1"></i> 清空紀錄
-            </button>
+        
+        <!-- Teacher Control Panel -->
+        <div class="bg-slate-900 text-white rounded-xl p-6 shadow-md mb-8">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="bg-indigo-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">ADMIN CONTROL</span>
+                <h3 class="text-lg font-bold">解答公佈控制開關</h3>
+              </div>
+              <p class="text-slate-400 text-xs mt-1">預設關閉解答。切換下方開關即可控制全站是否公佈完整 18 題題庫標準答案與解析。</p>
+            </div>
+            
+            <div class="flex items-center space-x-3 bg-slate-800 p-2.5 rounded-lg border border-slate-700">
+              <span id="switch-status-label" class="text-xs font-bold text-amber-400">目前狀態：未公佈</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="teacher-publish-toggle" onchange="togglePublishAnswers()" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+              </label>
+            </div>
           </div>
         </div>
 
-        <!-- Scores Table -->
-        <div class="overflow-x-auto mb-10">
-          <h3 class="text-base font-bold text-slate-800 mb-3">學生測驗紀錄排行</h3>
-          <table class="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs uppercase font-semibold">
-                <th class="p-3">時間</th>
-                <th class="p-3">班級</th>
-                <th class="p-3">座號</th>
-                <th class="p-3">姓名</th>
-                <th class="p-3">得分</th>
-                <th class="p-3">答對數</th>
-              </tr>
-            </thead>
-            <tbody id="scores-tbody" class="divide-y divide-slate-200">
-              <!-- Dynamically populated -->
-            </tbody>
-          </table>
-        </div>
+        <!-- Answers Section -->
+        <div>
+          <h2 class="text-xl font-bold text-slate-900 mb-2">題庫標準答案與深度解析</h2>
+          <p class="text-slate-500 text-sm mb-6">全題庫共 18 題之邏輯剖析與防禦思路。</p>
 
-        <!-- Full Answers and Explanation Section -->
-        <div class="border-t border-slate-200 pt-8">
-          <h3 class="text-lg font-bold text-slate-900 mb-2">全題庫解答與完整解析</h3>
-          <p class="text-slate-500 text-sm mb-6">供學生測驗後複習觀念使用。</p>
-          <div id="solution-list" class="space-y-4">
-            <!-- Dynamically populated question solutions -->
+          <!-- Locked View -->
+          <div id="solutions-locked-msg" class="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center my-6 space-y-3">
+            <div class="w-12 h-12 bg-slate-200 text-slate-500 rounded-full flex items-center justify-center mx-auto text-xl">
+              <i class="fa-solid fa-lock"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-700">標準答案尚未公佈</h3>
+            <p class="text-slate-500 text-xs max-w-md mx-auto">
+              為了維護測驗公平性，解答目前處於不公開狀態。請等待教師於上方管理開關開啟「公佈標準答案」。
+            </p>
+          </div>
+
+          <!-- Unlocked Solutions View -->
+          <div id="solutions-unlocked-content" class="hidden space-y-4">
+            <!-- Dynamically populated solution list -->
           </div>
         </div>
+
       </div>
     </section>
 
   </main>
 
-  <!-- Footer -->
   <footer class="bg-white border-t border-slate-200 py-6 mt-12">
     <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
-      SQL Injection Learning Platform | Single-file Deployable to GitHub Pages
+      SQL Injection Learning & Assessment Platform | Deployable on GitHub Pages
     </div>
   </footer>
 
   <script>
     // --- APP STATE ---
-    let currentTab = 'learn';
-    let sandboxMode = 'vulnerable'; // 'vulnerable' | 'secure'
     let currentQuizUser = null;
     let activeQuizQuestions = [];
+    let isAnswersPublished = false;
 
-    // Full Question Bank (18 Questions)
+    // Full 18-Question Bank
     const questionBank = [
       {
         id: 1,
         question: "SQL Injection 攻擊發生的最主要根源為何？",
         options: [
-          "未妥善過濾使用者輸入，並直接與 SQL 語法進行字串拼接",
-          "資料庫密碼設定太簡單",
+          "未妥善過濾使用者輸入，並直接與 SQL 語法進行動態字串拼接",
+          "資料庫密碼長度太短",
           "伺服器沒有安裝防火牆 (WAF)",
           "使用了不安全的程式語言"
         ],
         answer: 0,
-        explanation: "SQLi 根源於未將使用者輸入的資料與 SQL 指令結構分離，直接進行動態字串拼接。"
+        explanation: "SQLi 根源於未將使用者輸入與 SQL 指令結構分離，直接進行字串拼接導致語法邊界被破壞。"
       },
       {
         id: 2,
@@ -354,59 +403,59 @@ ResultSet rs = stmt.executeQuery();</code></pre>
           "在前端使用 JavaScript 過濾字串"
         ],
         answer: 0,
-        explanation: "參數化查詢 (Prepared Statements) 可以在資料庫底層徹底分離指令結構與資料。"
+        explanation: "預編譯與參數化查詢能使資料庫在底層將變數純粹當作資料處理，無法修改 SQL 指令結構。"
       },
       {
         id: 3,
         question: "攻擊者在帳號欄位輸入 `' OR '1'='1` 能夠繞過登入驗證，原因為何？",
         options: [
           "使 WHERE 子句條件邏輯永遠成立 (True)",
-          "直接強制將資料庫關閉",
-          "將管理者密碼重設為 123456",
-          "在資料庫建立一個新的管理者帳號"
+          "直接強制將資料庫伺服器關機",
+          "將管理者密碼重設為預設值",
+          "在資料庫自動建立新的權限"
         ],
         answer: 0,
-        explanation: "'1'='1' 恆為 True，搭配 OR 邏輯會使整個 WHERE 條件為 True，從而回傳資料繞過密碼比對。"
+        explanation: "'1'='1' 恆為 True，搭配 OR 運算子使整個 WHERE 比對永遠成立，從而繞過密碼檢查。"
       },
       {
         id: 4,
         question: "在 SQL 語法中，`--`（雙短斜線）通常代表什麼功能？",
         options: [
-          "單行註解（忽略其後的所有 SQL 指令）",
-          "加法計算",
+          "單行註解（使該符號後方的 SQL 語法失效）",
+          "減法計算符號",
           "字串連接符號",
-          "宣告變數"
+          "宣告全域變數"
         ],
         answer: 0,
-        explanation: "在標準 SQL 中，`--` 後方的內容都會被當作註解而被資料庫忽略。"
+        explanation: "在標準 SQL 中，`--` 後方的內容都會被當作註解被資料庫引擎忽略。"
       },
       {
         id: 5,
         question: "關於 UNION-based SQL Injection（聯合查詢注入）的敘述何者正確？",
         options: [
-          "可用於結合原本查詢與額外查詢，跨表提取其他資料",
-          "只能在伺服器關機時使用",
-          "不需要知道原本查詢的欄位數量即可直接使用",
-          "只適用於寫入資料 (INSERT)"
+          "可用於結合原本查詢與自訂查詢，跨表提取其他敏感資料",
+          "只能在伺服器關機時執行",
+          "不需要知道原本查詢的欄位數量即可直接成功",
+          "只適用於寫入資料 (INSERT) 階段"
         ],
         answer: 0,
-        explanation: "UNION 能將攻擊者的自訂 SELECT 語法與原查詢合併，藉此撈出額外表的資料。"
+        explanation: "UNION 能將攻擊者追加的 SELECT 指令與原本的查詢結果合併輸出。"
       },
       {
         id: 6,
         question: "什麼是盲注（Blind SQL Injection）？",
         options: [
-          "頁面不直接回傳資料庫內容，需透過 True/False 或時間延遲推斷資訊",
+          "頁面不直接回傳資料庫內容，需透過 True/False 差異或時間延遲推斷資訊",
           "攻擊者在看不見螢幕的情況下輸入程式碼",
           "一種不需要連接網路即可進行的攻擊",
           "指攻擊者隨機亂猜資料庫密碼"
         ],
         answer: 0,
-        explanation: "盲注 (Blind SQLi) 應用於網頁不會顯示資料庫報錯或資料內容，攻擊者需經由真假回應或時間差推測資料。"
+        explanation: "盲注應用於網站不會回傳報錯或資料庫資料時，攻擊者經由布林判斷或時間差推測字串。"
       },
       {
         id: 7,
-        question: "使用 ORM（如 Entity Framework, Prisma, SQLAlchemy）防範 SQLi 的優點是什麼？",
+        question: "使用成熟 ORM 框架（如 Prisma, SQLAlchemy, Entity Framework）防範 SQLi 的優點？",
         options: [
           "預設絕大多數查詢均自動採用參數化處理",
           "完全不需要對使用者輸入進行驗證",
@@ -414,19 +463,19 @@ ResultSet rs = stmt.executeQuery();</code></pre>
           "能自動刪除資料庫中的惡意軟體"
         ],
         answer: 0,
-        explanation: "成熟 ORM 工具底層預設即幫開發者封裝了預處理語法與參數化查詢。"
+        explanation: "主流 ORM 工具預設將底層查詢封裝為預處理語法與參數綁定。"
       },
       {
         id: 8,
         question: "為什麼單靠前端 JavaScript 驗證無法有效防範 SQL Injection？",
         options: [
-          "攻擊者可輕易繞過前端，直接發送自訂 HTTP 請求至後端",
+          "攻擊者可繞過前端，直接透過 HTTP 工具（如 Postman、Burp Suite）發送請求",
           "JavaScript 執行速度太慢",
           "前端不支援正規表示式 (Regex)",
           "瀏覽器不允許 JavaScript 過濾字串"
         ],
         answer: 0,
-        explanation: "前端限制可被輕鬆繞過（如使用 Postman、Burp Suite），安全防禦必須在後端實作。"
+        explanation: "前端限制極易被繞過，防守邏輯必須嚴格建構在後端應用程式。"
       },
       {
         id: 9,
@@ -438,7 +487,7 @@ ResultSet rs = stmt.executeQuery();</code></pre>
           "將所有輸入強制轉型為數字"
         ],
         answer: 0,
-        explanation: "ORDER BY 欄位名稱通常無法使用參數化綁定，必須採用白名單檢驗可接受的欄位。"
+        explanation: "ORDER BY 欄位名稱通常無法使用傳統參數化綁定，必須採用白名單比對。"
       },
       {
         id: 10,
@@ -450,7 +499,7 @@ ResultSet rs = stmt.executeQuery();</code></pre>
           "可徹底防止任何 SQLi 發生"
         ],
         answer: 0,
-        explanation: "限制資料庫連線帳號權限（如禁止 drop table 或存取系統檔），能在被突破時將損害降至最低。"
+        explanation: "限制資料庫帳號權限（如禁止存取系統檔），能在遭突破時將損害控制在最小範圍。"
       },
       {
         id: 11,
@@ -462,14 +511,14 @@ ResultSet rs = stmt.executeQuery();</code></pre>
           "UPPER()"
         ],
         answer: 0,
-        explanation: "SLEEP() 能讓資料庫延遲回應，若網頁延遲相應秒數，即證明注入條件成立。"
+        explanation: "SLEEP() 能讓資料庫延遲回應，若回應時間相應增加即證明注入點存在。"
       },
       {
         id: 12,
         question: "關於 PDO 在 PHP 中防範 SQLi 的敘述，何者正確？",
         options: [
-          "必須使用 prepare() 與 execute() 搭配參數綁定",
-          "只要使用 PDO 物件就完全自動免疫 SQLi，不需特別處理",
+          "必須搭配 prepare() 與 execute() 進行參數綁定",
+          "只要宣告 PDO 物件就完全免疫 SQLi，不需特別處理",
           "PDO 只能搭配 MySQL 資料庫使用",
           "PDO 只能處理數字型態的參數"
         ],
@@ -478,7 +527,7 @@ ResultSet rs = stmt.executeQuery();</code></pre>
       },
       {
         id: 13,
-        question: "若資料庫連線帳號具有 `DBA` 或 `root` 權限，遭受 SQLi 可能引發的最嚴重後果？",
+        question: "若資料庫連線帳號具有 DBA 或 root 權限，遭受 SQLi 可能引發的最嚴重後果？",
         options: [
           "可能被執行作業系統指令，導致伺服器全面淪陷 (RCE)",
           "僅會導致網頁排版變形",
@@ -490,15 +539,15 @@ ResultSet rs = stmt.executeQuery();</code></pre>
       },
       {
         id: 14,
-        question: "在參數化查詢中，傳入字串 `' OR '1'='1`，資料庫實際會進行什麼比對？",
+        question: "在參數化查詢中傳入字串 `' OR '1'='1`，資料庫實際會進行什麼比對？",
         options: [
-          "直接尋找欄位值精確等於「' OR '1'='1」這串文字的資料",
+          "精確尋找欄位文字完全等於「' OR '1'='1」的資料",
           "將其解析為邏輯判斷運算式",
           "將資料庫所有內容清空",
           "自動忽略引號並回傳第一筆資料"
         ],
         answer: 0,
-        explanation: "預處理會將變數全數視為純文字資料（Literal Value），不進行邏輯語法解析。"
+        explanation: "預處理會將變數全數視為純文字資料（Literal Value），不進行語法解析。"
       },
       {
         id: 15,
@@ -510,7 +559,7 @@ ResultSet rs = stmt.executeQuery();</code></pre>
           "部署 Web 應用程式防火牆 (WAF)"
         ],
         answer: 0,
-        explanation: "備份是災難復原措施，無法阻止 SQL Injection 漏洞的發生。"
+        explanation: "備份屬於災難復原範疇，無法防範 SQL Injection 漏洞本身。"
       },
       {
         id: 16,
@@ -546,29 +595,29 @@ ResultSet rs = stmt.executeQuery();</code></pre>
           "一種安裝在資料庫裡面的加密模組"
         ],
         answer: 0,
-        explanation: "WAF 屬於邊緣防護層，能阻擋已知特徵，但無法替代程式碼內部的安全開發實踐。"
+        explanation: "WAF 屬於邊緣防護層，能阻擋已知攻擊特徵，但無法替代程式碼內部的安全開發實踐。"
       }
     ];
 
-    // --- TAB SWITCHING ---
+    // --- TAB NAVIGATION ---
     function switchTab(tab) {
-      currentTab = tab;
-      const tabs = ['learn', 'sandbox', 'defense', 'quiz', 'leaderboard'];
+      const tabs = ['learn', 'sandbox', 'defense', 'quiz', 'solutions'];
       tabs.forEach(t => {
         document.getElementById(`tab-${t}`).classList.add('hidden');
-        const navBtn = document.getElementById(`nav-${t}`);
-        navBtn.className = "px-3 py-2 rounded-md transition text-slate-600 hover:text-slate-900 hover:bg-slate-100";
+        const btn = document.getElementById(`nav-${t}`);
+        if (btn) btn.className = "px-3.5 py-2 rounded-lg transition text-slate-600 hover:text-slate-900 hover:bg-slate-100";
       });
 
       document.getElementById(`tab-${tab}`).classList.remove('hidden');
       const activeBtn = document.getElementById(`nav-${tab}`);
-      activeBtn.className = "px-3 py-2 rounded-md transition text-indigo-600 bg-indigo-50 font-semibold";
+      if (activeBtn) activeBtn.className = "px-3.5 py-2 rounded-lg transition text-indigo-600 bg-indigo-50 font-semibold";
 
       if (tab === 'sandbox') runSandbox();
-      if (tab === 'leaderboard') renderLeaderboardAndSolutions();
     }
 
-    // --- SANDBOX LOGIC ---
+    // --- SANDBOX SIMULATION LOGIC ---
+    let sandboxMode = 'vulnerable';
+
     function setSandboxMode(mode) {
       sandboxMode = mode;
       const btnV = document.getElementById('mode-vuln');
@@ -592,78 +641,102 @@ ResultSet rs = stmt.executeQuery();</code></pre>
       const scenario = document.getElementById('sb-scenario').value;
       const input = document.getElementById('sb-input').value;
       const sqlDisplay = document.getElementById('sb-sql-display');
-      const resultsBox = document.getElementById('sb-results-box');
+      const tokensDisplay = document.getElementById('sb-tokens-display');
       const badge = document.getElementById('sb-status-badge');
+      const dbRows = document.getElementById('sb-db-rows');
+      const logBox = document.getElementById('sb-output-log');
       const analysis = document.getElementById('sb-analysis');
 
-      let sqlText = '';
+      let rawSQL = '';
+      let tokens = [];
       let isBypass = false;
 
       if (sandboxMode === 'vulnerable') {
-        if (scenario === 'login') {
-          sqlText = `SELECT * FROM users WHERE username = '${input}' AND password = 'xxx';`;
-        } else {
-          sqlText = `SELECT id, name, price FROM products WHERE name LIKE '%${input}%';`;
-        }
+        if (scenario === 'login') rawSQL = `SELECT * FROM users WHERE username = '${input}' AND password = 'xxx';`;
+        else if (scenario === 'union') rawSQL = `SELECT id, username FROM users WHERE username = '${input}';`;
+        else if (scenario === 'blind') rawSQL = `SELECT * FROM users WHERE id = 1 AND '${input}'='1';`;
+        else rawSQL = `SELECT id, username FROM users ORDER BY ${input};`;
 
-        // Logic check for payload injection
-        if (input.includes("' OR '1'='1") || input.includes("admin'--")) {
+        // Check SQLi triggers
+        if (input.includes("' OR '1'='1") || input.includes("admin'--") || input.includes("UNION") || input.includes("'='1")) {
           isBypass = true;
         }
 
-        sqlDisplay.innerHTML = highlightSQL(sqlText);
+        // Generate Token pills
+        tokens = rawSQL.split(/(\s+|'[^']*'|--|;)/).filter(t => t.trim() !== '');
+
+        sqlDisplay.innerHTML = highlightSQL(rawSQL);
+        tokensDisplay.innerHTML = tokens.map(t => {
+          let color = "bg-slate-200 text-slate-800";
+          if (['SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'UNION', 'ORDER', 'BY'].includes(t.toUpperCase())) color = "bg-indigo-100 text-indigo-800 font-bold";
+          else if (t.startsWith("'") || t.endsWith("'")) color = "bg-amber-100 text-amber-900 border border-amber-300";
+          else if (t === '--') color = "bg-red-100 text-red-800 font-bold";
+          return `<span class="px-2 py-0.5 rounded text-[11px] font-mono ${color}">${escapeHTML(t)}</span>`;
+        }).join('');
 
         if (isBypass) {
-          badge.className = "px-2 py-0.5 rounded text-xs font-bold bg-red-100 text-red-700";
-          badge.innerText = "⚠️️ 注入成功 (Injected)";
-          resultsBox.innerHTML = `
-            <div class="p-2 bg-red-50 text-red-900 rounded border border-red-200">
-              <strong>[STATUS 200 OK] 驗證繞過成功！</strong><br>
-              回傳資料筆數: 3 筆<br>
-              - User: admin (Role: Administrator)<br>
-              - User: alice (Role: User)<br>
-              - User: bob (Role: User)
-            </div>
+          badge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700";
+          badge.innerText = "⚠ 注入成功";
+          
+          dbRows.innerHTML = `
+            <tr class="bg-red-50 border-b font-bold text-red-900"><td class="p-2">1</td><td class="p-2">admin</td><td class="p-2">Administrator</td></tr>
+            <tr class="bg-red-50/50 border-b text-slate-700"><td class="p-2">2</td><td class="p-2">alice</td><td class="p-2">User</td></tr>
+            <tr class="bg-red-50/50 text-slate-700"><td class="p-2">3</td><td class="p-2">bob</td><td class="p-2">User</td></tr>
           `;
-          analysis.className = "mt-4 bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-red-900 leading-relaxed";
-          analysis.innerHTML = `<strong>漏洞分析：</strong> 輸入的引號破壞了原 SQL 查詢，<code>'1'='1'</code> 或 註解符號 <code>--</code> 使後續驗證邏輯無效，攻擊者無需密碼即可取得權限。`;
+          logBox.innerHTML = `> Executing SQL...<br><span class="text-red-400">[VULNERABILITY EXPLOITED] WHERE 條件恆真或語法被扭曲。資料庫傳回 3 筆資料。</span>`;
+          analysis.className = "bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-red-900 leading-relaxed";
+          analysis.innerHTML = `<strong>漏洞分析：</strong> 輸入包含特定引號或運算子，破壞原 SQL token 邊界，使邏輯被篡改。`;
         } else {
-          badge.className = "px-2 py-0.5 rounded text-xs font-bold bg-slate-200 text-slate-700";
+          badge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-200 text-slate-700";
           badge.innerText = "一般查詢";
-          resultsBox.innerHTML = `<div class="text-slate-500">一般字串搜尋完成。回傳比對成功資料或無紀錄。</div>`;
-          analysis.className = "mt-4 bg-indigo-50 border border-indigo-100 rounded-lg p-3 text-xs text-indigo-900 leading-relaxed";
-          analysis.innerHTML = `<strong>系統正常：</strong> 未偵測到結構破壞語法，照常執行查詢。`;
+          dbRows.innerHTML = `
+            <tr class="border-b text-slate-700"><td class="p-2">1</td><td class="p-2">admin</td><td class="p-2">Administrator</td></tr>
+            <tr class="border-b text-slate-400"><td class="p-2">2</td><td class="p-2">alice</td><td class="p-2">User</td></tr>
+            <tr class="text-slate-400"><td class="p-2">3</td><td class="p-2">bob</td><td class="p-2">User</td></tr>
+          `;
+          logBox.innerHTML = `> Executing SQL...<br><span class="text-slate-400">[NORMAL] 正常精確比對。</span>`;
+          analysis.className = "bg-indigo-50 border border-indigo-100 rounded-lg p-3 text-xs text-indigo-900 leading-relaxed";
+          analysis.innerHTML = `<strong>系統正常：</strong> 未發覺注入特徵，執行常規查詢。`;
         }
 
       } else {
-        // Secure mode
-        sqlText = scenario === 'login'
-          ? `SELECT * FROM users WHERE username = ? AND password = ?;\n[Parameters: ?1 = "${input}", ?2 = "xxx"]`
-          : `SELECT id, name, price FROM products WHERE name LIKE ?;\n[Parameters: ?1 = "%${input}%"]`;
+        // Secure Prepared Statement Mode
+        rawSQL = `SELECT * FROM users WHERE username = ? AND password = ?;\n[Bound Param: ?1 = "${input}"]`;
+        sqlDisplay.innerHTML = highlightSQL(rawSQL);
 
-        sqlDisplay.innerHTML = highlightSQL(sqlText);
-        badge.className = "px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-700";
-        badge.innerText = "🔒 安全防禦 (Protected)";
-
-        resultsBox.innerHTML = `
-          <div class="p-2 bg-emerald-50 text-emerald-900 rounded border border-emerald-200">
-            <strong>[STATUS 200 OK] 參數化查詢安全執行</strong><br>
-            系統精確將 "${input}" 視為單一純字串比對。<br>
-            回傳資料筆數: 0 筆 (未找到名稱字面等於該字串的使用者)
-          </div>
+        tokensDisplay.innerHTML = `
+          <span class="px-2 py-0.5 rounded text-[11px] font-mono bg-indigo-100 text-indigo-800 font-bold">SELECT</span>
+          <span class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-200">users</span>
+          <span class="px-2 py-0.5 rounded text-[11px] font-mono bg-indigo-100 text-indigo-800 font-bold">WHERE</span>
+          <span class="px-2 py-0.5 rounded text-[11px] font-mono bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">Param_0 (?)</span>
         `;
-        analysis.className = "mt-4 bg-emerald-50 border border-emerald-100 rounded-lg p-3 text-xs text-emerald-900 leading-relaxed";
-        analysis.innerHTML = `<strong>安全分析：</strong> 採用 Prepared Statements，輸入的 <code>' OR '1'='1</code> 被當作普通字串處理，無法改變 SQL 邏輯。`;
+
+        badge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700";
+        badge.innerText = "🔒 安全保護";
+
+        dbRows.innerHTML = `
+          <tr class="border-b text-slate-400"><td class="p-2">1</td><td class="p-2">admin</td><td class="p-2">Administrator</td></tr>
+          <tr class="border-b text-slate-400"><td class="p-2">2</td><td class="p-2">alice</td><td class="p-2">User</td></tr>
+          <tr class="text-slate-400"><td class="p-2">3</td><td class="p-2">bob</td><td class="p-2">User</td></tr>
+        `;
+
+        logBox.innerHTML = `> Executing Prepared Statement...<br><span class="text-emerald-400">[SECURE] 變數被當作單一純字串比對。回傳 0 筆。</span>`;
+        analysis.className = "bg-emerald-50 border border-emerald-100 rounded-lg p-3 text-xs text-emerald-900 leading-relaxed";
+        analysis.innerHTML = `<strong>安全機制生效：</strong> 採用 Prepared Statement，輸入的任何特徵均無法破壞 SQL 結構。`;
       }
     }
 
     function highlightSQL(str) {
       return str
-        .replace(/(SELECT|FROM|WHERE|AND|OR|LIKE)/g, '<span class="text-indigo-400 font-bold">$1</span>')
+        .replace(/(SELECT|FROM|WHERE|AND|OR|UNION|ORDER BY)/g, '<span class="text-indigo-400 font-bold">$1</span>')
         .replace(/('.*?'|\?)/g, '<span class="text-yellow-300">$1</span>');
     }
 
-    // --- DEFENSE CODE TABS ---
+    function escapeHTML(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // --- DEFENSE TAB ---
     function setDefenseTab(lang) {
       ['python', 'node', 'php', 'java'].forEach(l => {
         document.getElementById(`dcode-${l}`).classList.add('hidden');
@@ -673,7 +746,7 @@ ResultSet rs = stmt.executeQuery();</code></pre>
       document.getElementById(`dtab-${lang}`).className = "pb-2 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600";
     }
 
-    // --- QUIZ LOGIC (Random 10 Qs) ---
+    // --- QUIZ SYSTEM ---
     function startQuiz(e) {
       e.preventDefault();
       const uClass = document.getElementById('user-class').value.trim();
@@ -684,7 +757,7 @@ ResultSet rs = stmt.executeQuery();</code></pre>
 
       currentQuizUser = { class: uClass, seat: uSeat, name: uName };
 
-      // Randomly pick 10 questions and shuffle options
+      // Pick 10 random questions and shuffle options
       activeQuizQuestions = shuffleArray([...questionBank]).slice(0, 10).map(q => {
         const optionIndices = [0, 1, 2, 3];
         const shuffledIndices = shuffleArray(optionIndices);
@@ -695,8 +768,8 @@ ResultSet rs = stmt.executeQuery();</code></pre>
         };
       });
 
-      // Show quiz container
       document.getElementById('quiz-auth-card').classList.add('hidden');
+      document.getElementById('quiz-result-card').classList.add('hidden');
       document.getElementById('quiz-window').classList.remove('hidden');
       document.getElementById('quiz-display-user').innerText = `${uClass} - ${uSeat}號 ${uName}`;
 
@@ -717,7 +790,7 @@ ResultSet rs = stmt.executeQuery();</code></pre>
       container.innerHTML = activeQuizQuestions.map((q, idx) => `
         <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
           <h4 class="font-bold text-slate-900 text-base mb-3">
-            ${idx + 1}.${q.question}
+            ${idx + 1}. ${q.question}
           </h4>
           <div class="space-y-2">
             ${q.shuffledOptions.map((opt, oIdx) => `
@@ -743,107 +816,61 @@ ResultSet rs = stmt.executeQuery();</code></pre>
         }
       });
 
-      // Save score
-      const records = JSON.parse(localStorage.getItem('sqli_quiz_records') || '[]');
-      const newRecord = {
-        id: Date.now(),
-        timestamp: new Date().toLocaleString(),
-        class: currentQuizUser.class,
-        seat: currentQuizUser.seat,
-        name: currentQuizUser.name,
-        score: score,
-        correctCount: correctCount
-      };
-      records.unshift(newRecord);
-      localStorage.setItem('sqli_quiz_records', JSON.stringify(records));
-
-      alert(`測驗結束！\n得分：${score} 分\n答對題數：${correctCount} / 10 題`);
-
-      // Reset and go to leaderboard
-      document.getElementById('quiz-user-form').reset();
+      // Show result window with score only
       document.getElementById('quiz-window').classList.add('hidden');
-      document.getElementById('quiz-auth-card').classList.remove('hidden');
-      switchTab('leaderboard');
+      document.getElementById('quiz-result-card').classList.remove('hidden');
+
+      document.getElementById('result-user-info').innerText = `考生：${currentQuizUser.class} - ${currentQuizUser.seat}號 ${currentQuizUser.name}`;
+      document.getElementById('result-score').innerText = `${score} 分`;
+      document.getElementById('result-count').innerText = `${correctCount} / 10`;
     }
 
-    // --- LEADERBOARD & SOLUTIONS ---
-    function renderLeaderboardAndSolutions() {
-      // 1. Leaderboard
-      const records = JSON.parse(localStorage.getItem('sqli_quiz_records') || '[]');
-      const tbody = document.getElementById('scores-tbody');
+    function retakeQuiz() {
+      document.getElementById('quiz-result-card').classList.add('hidden');
+      document.getElementById('quiz-auth-card').classList.remove('hidden');
+    }
 
-      if (records.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">目前尚無測驗紀錄</td></tr>`;
+    // --- TEACHER CONTROL & SOLUTIONS REVIEW ---
+    function togglePublishAnswers() {
+      const toggle = document.getElementById('teacher-publish-toggle');
+      const label = document.getElementById('switch-status-label');
+      const lockedMsg = document.getElementById('solutions-locked-msg');
+      const unlockedContent = document.getElementById('solutions-unlocked-content');
+
+      isAnswersPublished = toggle.checked;
+
+      if (isAnswersPublished) {
+        label.className = "text-xs font-bold text-emerald-400";
+        label.innerText = "目前狀態：已公佈答案";
+        lockedMsg.classList.add('hidden');
+        unlockedContent.classList.remove('hidden');
+        renderFullSolutions();
       } else {
-        tbody.innerHTML = records.map(r => `
-          <tr class="hover:bg-slate-50">
-            <td class="p-3 text-xs text-slate-500">${r.timestamp}</td>
-            <td class="p-3 text-slate-800 font-medium">${r.class}</td>
-            <td class="p-3 text-slate-800">${r.seat}</td>
-            <td class="p-3 text-slate-900 font-bold">${r.name}</td>
-            <td class="p-3 font-bold ${r.score >= 80 ? 'text-emerald-600' : 'text-indigo-600'}">${r.score} 分</td>
-            <td class="p-3 text-slate-600">${r.correctCount} / 10</td>
-          </tr>
-        `).join('');
+        label.className = "text-xs font-bold text-amber-400";
+        label.innerText = "目前狀態：未公佈";
+        lockedMsg.classList.remove('hidden');
+        unlockedContent.classList.add('hidden');
       }
+    }
 
-      // 2. Full Question Bank Solutions
-      const solContainer = document.getElementById('solution-list');
-      solContainer.innerHTML = questionBank.map((q, idx) => `
+    function renderFullSolutions() {
+      const container = document.getElementById('solutions-unlocked-content');
+      container.innerHTML = questionBank.map((q, idx) => `
         <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-2">
           <div class="font-bold text-slate-900 text-sm">
-            <span class="text-indigo-600">Q${idx + 1}.</span>${q.question}
+            <span class="text-indigo-600">Q${idx + 1}.</span> ${q.question}
           </div>
-          <div class="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 p-2 rounded font-semibold">
-            ✅ 正確答案：${q.options[q.answer]}
+          <div class="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 p-2.5 rounded font-semibold">
+            ✅ 標準答案：${q.options[q.answer]}
           </div>
-          <div class="text-xs text-slate-600 bg-white p-2 rounded border border-slate-200">
-            <strong>解析：</strong>${q.explanation}
+          <div class="text-xs text-slate-600 bg-white p-2.5 rounded border border-slate-200">
+            <strong>觀念解析：</strong>${q.explanation}
           </div>
         </div>
       `).join('');
     }
 
-    function exportScoresJSON() {
-      const records = localStorage.getItem('sqli_quiz_records') || '[]';
-      const blob = new Blob([records], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `SQLi_Quiz_Scores_${new Date().toISOString().slice(0,10)}.json`;
-      a.click();
-    }
-
-    function importScoresJSON(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        try {
-          const imported = JSON.parse(evt.target.result);
-          if (Array.isArray(imported)) {
-            const current = JSON.parse(localStorage.getItem('sqli_quiz_records') || '[]');
-            const merged = [...imported, ...current];
-            localStorage.setItem('sqli_quiz_records', JSON.stringify(merged));
-            alert('成績資料匯入成功！');
-            renderLeaderboardAndSolutions();
-          }
-        } catch (err) {
-          alert('格式不符，匯入失敗！');
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    function clearScores() {
-      if (confirm('確定要清空所有成績紀錄嗎？')) {
-        localStorage.removeItem('sqli_quiz_records');
-        renderLeaderboardAndSolutions();
-      }
-    }
-
-    // Initial render
+    // Initialize sandbox on start
     runSandbox();
   </script>
 </body>
