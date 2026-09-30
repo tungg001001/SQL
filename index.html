@@ -3,2935 +3,1166 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>SQL Injection 互動教學與防禦實驗室</title>
-
+  <title>SQL Injection 互動式教學與防禦實驗室</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-
   <style>
-    html {
-      scroll-behavior: smooth;
-    }
-
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap');
     body {
-      font-family:
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        "Microsoft JhengHei",
-        sans-serif;
+      font-family: 'Noto Sans TC', sans-serif;
     }
-
-    .code-scroll {
-      overflow-x: auto;
-      white-space: pre-wrap;
-      word-break: break-word;
+    code, pre, .font-mono {
+      font-family: 'JetBrains Mono', monospace;
     }
   </style>
 </head>
-
-<body class="bg-slate-100 min-h-screen text-slate-800">
-
-<!-- =========================================================
-     HEADER
-========================================================= -->
-
-<header class="bg-white border-b border-slate-200 sticky top-0 z-50">
-
-  <div class="max-w-7xl mx-auto px-4 min-h-16 flex flex-col md:flex-row
-              items-center justify-between py-3 gap-3">
-
-    <div class="flex items-center space-x-3">
-
-      <span
-        class="p-2 bg-indigo-600 text-white rounded-lg
-               font-mono font-bold text-lg">
-        SQLi
-      </span>
-
-      <h1 class="text-lg font-bold text-slate-900">
-        SQL Injection 互動教學實驗室
-      </h1>
-
-    </div>
-
-    <nav class="flex flex-wrap justify-center gap-1 text-sm font-medium">
-
-      <button
-        id="nav-learn"
-        onclick="switchTab('learn')"
-        class="px-3 py-1.5 rounded-lg text-indigo-600 bg-indigo-50 font-semibold">
-        漏洞原理
-      </button>
-
-      <button
-        id="nav-sandbox"
-        onclick="switchTab('sandbox')"
-        class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900">
-        互動沙盒
-      </button>
-
-      <button
-        id="nav-defense"
-        onclick="switchTab('defense')"
-        class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900">
-        程式防禦
-      </button>
-
-      <button
-        id="nav-quiz"
-        onclick="switchTab('quiz')"
-        class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900">
-        實戰測驗
-      </button>
-
-      <button
-        id="nav-solutions"
-        onclick="switchTab('solutions')"
-        class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900">
-        解答區
-      </button>
-
-    </nav>
-
-  </div>
-
-</header>
-
-
-<!-- =========================================================
-     MAIN
-========================================================= -->
-
-<main class="max-w-7xl mx-auto px-4 py-6">
-
-
-<!-- =========================================================
-     LEARN
-========================================================= -->
-
-<section id="tab-learn" class="space-y-6">
-
-  <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
-
-    <div class="flex items-center gap-3 mb-3">
-
-      <div class="text-3xl">🔐</div>
-
-      <h2 class="text-xl font-bold text-slate-900">
-        什麼是 SQL Injection？
-      </h2>
-
-    </div>
-
-    <p class="text-slate-600 leading-relaxed text-sm">
-
-      SQL Injection（SQL 隱碼注入）是一種常見的 Web
-      應用程式安全問題。當應用程式將使用者輸入直接拼接至 SQL
-      指令中，攻擊者可能影響原本 SQL 查詢的語意。
-
-      本網站使用「模擬資料庫」展示 SQL Injection 的基本原理，
-      不會連接真實資料庫。
-
-    </p>
-
-  </div>
-
-
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-
-      <div class="text-indigo-600 font-bold text-sm">
-        經典情境
-      </div>
-
-      <h3 class="font-bold text-slate-800 mt-1">
-        Auth Bypass
-      </h3>
-
-      <p class="text-slate-500 text-xs leading-relaxed mt-2">
-        示範不安全字串拼接可能造成登入條件被改變。
-      </p>
-
-    </div>
-
-
-    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-
-      <div class="text-indigo-600 font-bold text-sm">
-        UNION
-      </div>
-
-      <h3 class="font-bold text-slate-800 mt-1">
-        UNION Injection
-      </h3>
-
-      <p class="text-slate-500 text-xs leading-relaxed mt-2">
-        示範 UNION 查詢可能造成非預期資料被併入結果。
-      </p>
-
-    </div>
-
-
-    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-
-      <div class="text-indigo-600 font-bold text-sm">
-        Blind SQLi
-      </div>
-
-      <h3 class="font-bold text-slate-800 mt-1">
-        布林與時間盲注
-      </h3>
-
-      <p class="text-slate-500 text-xs leading-relaxed mt-2">
-        示範透過 True / False 或回應時間推測資料。
-      </p>
-
-    </div>
-
-  </div>
-
-
-  <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-5">
-
-    <h3 class="font-bold text-indigo-900 mb-2">
-      🧑‍🏫 建議學習流程
-    </h3>
-
-    <ol class="text-sm text-indigo-800 space-y-1 list-decimal ml-5">
-
-      <li>先閱讀漏洞原理</li>
-      <li>進入互動沙盒</li>
-      <li>比較 Vulnerable / Secure</li>
-      <li>閱讀 Prepared Statement 防禦方式</li>
-      <li>最後進行 10 題測驗</li>
-
-    </ol>
-
-  </div>
-
-</section>
-
-
-<!-- =========================================================
-     SANDBOX
-========================================================= -->
-
-<section id="tab-sandbox" class="hidden space-y-6">
-
-
-  <!-- CONTROL -->
-
-  <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-      <div>
-
-        <label class="block text-xs font-semibold text-slate-500 mb-1">
-          選擇攻擊情境
-        </label>
-
-        <select
-          id="sb-scenario"
-          onchange="updatePayloadButtons(); runSandbox();"
-          class="w-full text-xs bg-slate-50 border border-slate-300
-                 rounded-lg px-3 py-2">
-
-          <option value="login">
-            登入繞過 Auth Bypass
-          </option>
-
-          <option value="union">
-            UNION Injection
-          </option>
-
-          <option value="blind">
-            Boolean Blind
-          </option>
-
-          <option value="sleep">
-            Time-Based Sleep
-          </option>
-
-          <option value="orderby">
-            ORDER BY Injection
-          </option>
-
-          <option value="waf">
-            WAF 黑名單模擬
-          </option>
-
-        </select>
-
-      </div>
-
-
-      <div>
-
-        <label class="block text-xs font-semibold text-slate-500 mb-1">
-          防禦模式
-        </label>
-
-        <div class="inline-flex p-1 bg-slate-100 rounded-lg">
-
-          <button
-            id="mode-vuln"
-            onclick="setSandboxMode('vulnerable')"
-            class="px-3 py-2 text-xs font-bold rounded-md
-                   bg-white text-red-600 shadow-sm">
-            🔴 Vulnerable
-          </button>
-
-          <button
-            id="mode-safe"
-            onclick="setSandboxMode('secure')"
-            class="px-3 py-2 text-xs font-bold rounded-md
-                   text-slate-600">
-            🟢 Secure
-          </button>
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <div class="mt-4">
-
-      <span
-        id="sb-status-badge"
-        class="px-3 py-1 rounded-full text-xs font-bold
-               bg-slate-100 text-slate-800">
-        狀態：初始化
-      </span>
-
-    </div>
-
-  </div>
-
-
-  <!-- INPUT -->
-
-  <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-
-    <div class="flex flex-wrap justify-between gap-2 mb-3">
-
-      <label class="text-xs font-bold text-slate-700">
-        使用者輸入 Payload
-      </label>
-
-      <div
-        id="sb-payload-container"
-        class="flex flex-wrap gap-1.5">
-      </div>
-
-    </div>
-
-
-    <div class="flex gap-2">
-
-      <input
-        type="text"
-        id="sb-input"
-        oninput="runSandbox()"
-        value="admin' OR '1'='1"
-        class="flex-1 min-w-0 font-mono text-xs
-               bg-slate-50 border border-slate-300
-               rounded-lg px-3 py-2 text-indigo-900">
-
-      <button
-        onclick="runSandbox()"
-        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700
-               text-white rounded-lg text-xs font-bold">
-        執行
-      </button>
-
-    </div>
-
-  </div>
-
-
-  <!-- SQL / TOKEN -->
-
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-    <div class="bg-slate-900 text-slate-200 p-4 rounded-xl">
-
-      <div class="text-slate-400 text-xs font-bold mb-2">
-        後端 SQL 模擬
-      </div>
-
-      <div
-        id="sb-sql-display"
-        class="bg-slate-950 p-3 rounded
-               text-indigo-300 break-all
-               leading-relaxed text-xs">
-        --
-      </div>
-
-    </div>
-
-
-    <div class="bg-slate-900 text-slate-200 p-4 rounded-xl">
-
-      <div class="text-slate-400 text-xs font-bold mb-2">
-        Token 拆解
-      </div>
-
-      <div
-        id="sb-tokens-display"
-        class="bg-slate-950 p-3 rounded
-               min-h-[50px] flex flex-wrap gap-1">
-        --
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <!-- SLEEP -->
-
-  <div
-    id="sleep-timer-bar"
-    class="hidden bg-amber-50 border border-amber-200
-           rounded-xl p-4">
-
-    <div class="flex justify-between text-xs font-bold text-amber-800">
-
-      <span>
-        ⏳ 模擬資料庫延遲
-      </span>
-
-      <span id="sleep-countdown">
-        3.0s
-      </span>
-
-    </div>
-
-    <div class="w-full bg-amber-200 h-2 rounded-full mt-2">
-
-      <div
-        id="sleep-progress"
-        class="bg-amber-600 h-full w-0">
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <!-- RESULT -->
-
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-
-    <div class="md:col-span-2 bg-white p-5 rounded-xl
-                border border-slate-200 shadow-sm">
-
-      <div class="flex justify-between border-b pb-2 mb-3">
-
-        <h3 class="font-bold text-sm">
-          模擬資料庫查詢結果
-        </h3>
-
-        <span
-          id="sb-row-count"
-          class="text-xs text-slate-500 font-mono">
-          Row Count: 0
-        </span>
-
-      </div>
-
-
-      <div class="overflow-x-auto">
-
-        <table class="w-full text-xs text-left">
-
-          <thead
-            class="bg-slate-50 text-slate-600 border-b">
-
-            <tr>
-
-              <th class="p-2">
-                id
-              </th>
-
-              <th class="p-2">
-                username
-              </th>
-
-              <th class="p-2">
-                role
-              </th>
-
-            </tr>
-
-          </thead>
-
-          <tbody
-            id="sb-db-rows"
-            class="divide-y divide-slate-100">
-          </tbody>
-
-        </table>
-
-      </div>
-
-    </div>
-
-
-    <div class="bg-white p-5 rounded-xl
-                border border-slate-200 shadow-sm">
-
-      <h3 class="font-bold text-sm border-b pb-2">
-        行為分析
-      </h3>
-
-      <div
-        id="sb-analysis"
-        class="text-xs text-slate-600
-               leading-relaxed mt-3">
-        --
-      </div>
-
-      <div class="border-t mt-4 pt-3">
-
-        <div class="text-[10px] font-bold text-slate-400 mb-1">
-          SERVER LOG
-        </div>
-
-        <pre
-          id="sb-output-log"
-          class="text-[10px] bg-slate-50
-                 p-2 rounded overflow-x-auto">--</pre>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- =========================================================
-     DEFENSE
-========================================================= -->
-
-<section id="tab-defense" class="hidden space-y-6">
-
-  <div class="bg-white p-6 rounded-xl
-              border border-slate-200 shadow-sm">
-
-    <h2 class="text-xl font-bold text-slate-900 mb-3">
-      SQL Injection 防禦
-    </h2>
-
-    <p class="text-sm text-slate-600 leading-relaxed">
-
-      最重要的防禦方式是使用
-      <strong>Prepared Statements / Parameterized Queries</strong>。
-      其核心概念是將 SQL 結構與使用者輸入的資料分離。
-
-    </p>
-
-
-    <div class="border-b border-slate-200 flex gap-4 mt-5">
-
-      <button
-        id="dtab-python"
-        onclick="setDefenseTab('python')"
-        class="pb-2 text-sm font-bold border-b-2
-               border-indigo-600 text-indigo-600">
-        Python
-      </button>
-
-      <button
-        id="dtab-node"
-        onclick="setDefenseTab('node')"
-        class="pb-2 text-sm font-bold text-slate-500">
-        Node.js
-      </button>
-
-      <button
-        id="dtab-php"
-        onclick="setDefenseTab('php')"
-        class="pb-2 text-sm font-bold text-slate-500">
-        PHP
-      </button>
-
-      <button
-        id="dtab-java"
-        onclick="setDefenseTab('java')"
-        class="pb-2 text-sm font-bold text-slate-500">
-        Java
-      </button>
-
-    </div>
-
-
-    <!-- PYTHON -->
-
-    <pre
-      id="dcode-python"
-      class="bg-slate-900 text-slate-200
-             p-4 rounded-xl text-xs leading-relaxed code-scroll">
-
-<span class="text-red-400"># ❌ 危險：字串串接</span>
-cursor.execute(
-    f"SELECT * FROM users WHERE username = '{user_input}'"
-)
-
-<span class="text-emerald-400"># ✅ 安全：參數化查詢</span>
-cursor.execute(
-    "SELECT * FROM users WHERE username = ?",
-    (user_input,)
-)
-    </pre>
-
-
-    <!-- NODE -->
-
-    <pre
-      id="dcode-node"
-      class="hidden bg-slate-900 text-slate-200
-             p-4 rounded-xl text-xs leading-relaxed code-scroll">
-
-<span class="text-red-400">// ❌ 危險</span>
-const query =
-  `SELECT * FROM users WHERE username = '${userInput}'`;
-
-<span class="text-emerald-400">// ✅ 安全</span>
-const [rows] = await connection.execute(
-  'SELECT * FROM users WHERE username = ?',
-  [userInput]
-);
-    </pre>
-
-
-    <!-- PHP -->
-
-    <pre
-      id="dcode-php"
-      class="hidden bg-slate-900 text-slate-200
-             p-4 rounded-xl text-xs leading-relaxed code-scroll">
-
-<span class="text-red-400">// ❌ 危險</span>
-$db->query(
-  "SELECT * FROM users WHERE username = '$userInput'"
-);
-
-<span class="text-emerald-400">// ✅ 安全</span>
-$stmt = $pdo->prepare(
-  'SELECT * FROM users WHERE username = :user'
-);
-
-$stmt->execute([
-  'user' => $userInput
-]);
-    </pre>
-
-
-    <!-- JAVA -->
-
-    <pre
-      id="dcode-java"
-      class="hidden bg-slate-900 text-slate-200
-             p-4 rounded-xl text-xs leading-relaxed code-scroll">
-
-<span class="text-red-400">// ❌ 危險</span>
-Statement stmt = conn.createStatement();
-
-stmt.executeQuery(
-    "SELECT * FROM users WHERE username = '"
-    + userInput + "'"
-);
-
-<span class="text-emerald-400">// ✅ 安全</span>
-PreparedStatement pstmt =
-    conn.prepareStatement(
-        "SELECT * FROM users WHERE username = ?"
-    );
-
-pstmt.setString(1, userInput);
-
-ResultSet rs =
-    pstmt.executeQuery();
-    </pre>
-
-
-    <div class="mt-5 p-4 bg-amber-50
-                border border-amber-200 rounded-xl">
-
-      <div class="font-bold text-amber-900">
-        ⚠️ ORDER BY 特殊情境
-      </div>
-
-      <p class="text-xs text-amber-800 mt-1 leading-relaxed">
-
-        欄位名稱通常不能直接使用 Prepared Statement
-        參數，因此應使用伺服器端白名單，例如只允許
-        <code>id</code>、<code>username</code>、<code>role</code>。
-
-      </p>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- =========================================================
-     QUIZ
-========================================================= -->
-
-<section id="tab-quiz" class="hidden space-y-6">
-
-
-  <div
-    id="quiz-auth-card"
-    class="bg-white max-w-md mx-auto p-6
-           rounded-xl border border-slate-200 shadow-sm">
-
-    <div class="text-center mb-5">
-
-      <div class="text-4xl">
-        📝
-      </div>
-
-      <h2 class="text-lg font-bold mt-2">
-        SQL Injection 實戰能力評量
-      </h2>
-
-      <p class="text-xs text-slate-500 mt-1">
-        20 題題庫隨機抽取 10 題
-      </p>
-
-    </div>
-
-
-    <form
-      onsubmit="startQuiz(event)"
-      class="space-y-3">
-
-      <input
-        type="text"
-        id="user-class"
-        required
-        placeholder="班級"
-        class="w-full text-xs border
-               border-slate-300 rounded-lg p-2">
-
-      <input
-        type="text"
-        id="user-seat"
-        required
-        placeholder="座號"
-        class="w-full text-xs border
-               border-slate-300 rounded-lg p-2">
-
-      <input
-        type="text"
-        id="user-name"
-        required
-        placeholder="姓名"
-        class="w-full text-xs border
-               border-slate-300 rounded-lg p-2">
-
-      <button
-        type="submit"
-        class="w-full py-2.5 bg-indigo-600
-               hover:bg-indigo-700 text-white
-               rounded-lg text-xs font-bold">
-        開始測驗
-      </button>
-
-    </form>
-
-  </div>
-
-
-  <div
-    id="quiz-window"
-    class="hidden max-w-3xl mx-auto space-y-6">
-
-    <div
-      class="bg-white p-4 rounded-xl
-             border border-slate-200
-             flex justify-between text-xs">
-
-      <span
-        id="quiz-display-user"
-        class="font-bold text-indigo-900">
-        --
-      </span>
-
-      <span>
-        10 題評量
-      </span>
-
-    </div>
-
-
-    <div
-      id="quiz-questions-container"
-      class="space-y-4">
-    </div>
-
-
-    <button
-      onclick="submitQuiz()"
-      class="w-full py-3 bg-emerald-600
-             hover:bg-emerald-700 text-white
-             font-bold rounded-xl">
-      提交測驗
-    </button>
-
-  </div>
-
-
-  <div
-    id="quiz-result-card"
-    class="hidden max-w-md mx-auto
-           bg-white p-6 rounded-xl
-           border border-slate-200 text-center">
-
-    <div class="text-4xl">
-      🎉
-    </div>
-
-    <h2 class="text-xl font-bold mt-2">
-      測驗完成
-    </h2>
-
-    <div
-      id="result-user-info"
-      class="text-xs text-slate-600 mt-2">
-      --
-    </div>
-
-
-    <div class="p-4 bg-indigo-50 rounded-xl mt-4">
-
-      <div class="text-xs text-indigo-700">
-        最終得分
-      </div>
-
-      <div
-        id="result-score"
-        class="text-4xl font-extrabold
-               text-indigo-600">
-        0
-      </div>
-
-      <div class="text-xs text-slate-500">
-
-        答對
-        <span id="result-count">0</span>
-        / 10 題
-
-      </div>
-
-    </div>
-
-
-    <button
-      onclick="retakeQuiz()"
-      class="w-full py-2 bg-slate-800
-             text-white rounded-lg mt-4">
-      重新測試
-    </button>
-
-  </div>
-
-</section>
-
-
-<!-- =========================================================
-     SOLUTIONS
-========================================================= -->
-
-<section id="tab-solutions" class="hidden space-y-6">
-
-
-  <div
-    class="bg-slate-900 text-slate-100 p-5
-           rounded-xl flex flex-col md:flex-row
-           justify-between gap-4">
-
-    <div>
-
-      <h2 class="font-bold">
-        🎓 教師解答管理區
-      </h2>
-
-      <p
-        id="publish-status-text"
-        class="text-xs text-amber-400 mt-1">
-        目前狀態：未公佈
-      </p>
-
-    </div>
-
-
-    <div class="flex items-center gap-3">
-
-      <span class="text-xs">
-        公佈解答
-      </span>
-
-      <label class="relative inline-flex items-center">
-
-        <input
-          type="checkbox"
-          id="publish-toggle"
-          onchange="togglePublishAnswers()"
-          class="sr-only peer">
-
-        <div
-          class="w-11 h-6 bg-slate-700
-                 rounded-full
-                 peer-checked:bg-emerald-500
-                 after:content-['']
-                 after:absolute
-                 after:top-[2px]
-                 after:left-[2px]
-                 after:bg-white
-                 after:rounded-full
-                 after:h-5
-                 after:w-5
-                 after:transition-all
-                 peer-checked:after:translate-x-full">
-        </div>
-
-      </label>
-
-    </div>
-
-  </div>
-
-
-  <div
-    id="solutions-locked-msg"
-    class="bg-white p-8 rounded-xl
-           border border-slate-200
-           text-center">
-
-    <div class="text-4xl">
-      🔒
-    </div>
-
-    <h3 class="font-bold mt-3">
-      解答區尚未開放
-    </h3>
-
-    <p class="text-xs text-slate-500 mt-2">
-      教師可輸入管理密碼查看完整題庫答案。
-    </p>
-
-    <button
-      onclick="teacherPromptUnlock()"
-      class="px-4 py-2 bg-indigo-600
-             text-white text-xs font-bold
-             rounded-lg mt-4">
-      教師登入
-    </button>
-
-  </div>
-
-
-  <div
-    id="solutions-unlocked-content"
-    class="hidden space-y-4">
-  </div>
-
-</section>
-
-
-</main>
-
-
-<!-- =========================================================
-     JAVASCRIPT
-========================================================= -->
-
-<script>
-
-/* =========================================================
-   GLOBAL SETTINGS
-========================================================= */
-
-/*
- * 注意：
- * 這是前端教學網站。
- * TEACHER_PASSWORD 不能當成真正的安全驗證。
- */
-const TEACHER_PASSWORD = "admin123";
-
-let currentSandboxMode = "vulnerable";
-
-let sleepInterval = null;
-
-let currentQuizUser = {
-  cls: "",
-  seat: "",
-  name: ""
-};
-
-let activeQuizQuestions = [];
-
-
-/* =========================================================
-   MOCK DATABASE
-========================================================= */
-
-const mockDBUsers = [
-
-  {
-    id: 1,
-    username: "admin",
-    role: "Administrator",
-    pass: "DemoAdminPassword"
-  },
-
-  {
-    id: 2,
-    username: "alice",
-    role: "User",
-    pass: "DemoAlicePassword"
-  },
-
-  {
-    id: 3,
-    username: "bob",
-    role: "User",
-    pass: "DemoBobPassword"
-  },
-
-  {
-    id: 4,
-    username: "charlie",
-    role: "Manager",
-    pass: "DemoManagerPassword"
-  }
-
-];
-
-
-/* =========================================================
-   PAYLOADS
-========================================================= */
-
-const scenarioPayloads = {
-
-  login: [
-
-    {
-      label: "合法：admin",
-      value: "admin"
-    },
-
-    {
-      label: "登入繞過",
-      value: "admin' OR '1'='1"
-    },
-
-    {
-      label: "註解示範",
-      value: "admin'--"
-    }
-
-  ],
-
-
-  union: [
-
-    {
-      label: "正常搜尋",
-      value: "alice"
-    },
-
-    {
-      label: "UNION 3 欄",
-      value: "x' UNION SELECT 1,2,3--"
-    },
-
-    {
-      label: "跨表資料",
-      value: "x' UNION SELECT id,username,pass FROM users--"
-    }
-
-  ],
-
-
-  blind: [
-
-    {
-      label: "正常",
-      value: "alice"
-    },
-
-    {
-      label: "Boolean TRUE",
-      value: "alice' AND '1'='1"
-    },
-
-    {
-      label: "Boolean FALSE",
-      value: "alice' AND '1'='2"
-    },
-
-    {
-      label: "長度測試",
-      value: "alice' AND LENGTH(database())=4--"
-    }
-
-  ],
-
-
-  sleep: [
-
-    {
-      label: "正常",
-      value: "alice"
-    },
-
-    {
-      label: "SLEEP(3)",
-      value: "alice' AND SLEEP(3)--"
-    },
-
-    {
-      label: "條件 Sleep",
-      value: "alice' AND IF(1=1,SLEEP(3),0)--"
-    }
-
-  ],
-
-
-  orderby: [
-
-    {
-      label: "ID",
-      value: "id"
-    },
-
-    {
-      label: "Username",
-      value: "username"
-    },
-
-    {
-      label: "Role",
-      value: "role"
-    },
-
-    {
-      label: "注入模擬",
-      value: "id; SELECT IF(1=1,SLEEP(3),0)"
-    }
-
-  ],
-
-
-  waf: [
-
-    {
-      label: "標準 OR",
-      value: "admin' OR '1'='1"
-    },
-
-    {
-      label: "大小寫混淆",
-      value: "admin' oR '1'='1"
-    },
-
-    {
-      label: "註解混淆",
-      value: "admin' /**/OR/**/ '1'='1"
-    }
-
-  ]
-
-};
-
-
-/* =========================================================
-   QUESTION BANK
-========================================================= */
-
-const questionBank = [
-
-  {
-    id: 1,
-    question: "SQL Injection 最主要的根源是什麼？",
-    options: [
-      "伺服器記憶體不足",
-      "使用者輸入直接與 SQL 字串拼接",
-      "使用 HTTP",
-      "資料庫版本過舊"
-    ],
-    answer: 1,
-    explanation:
-      "SQL Injection 的核心問題是資料與 SQL 指令沒有適當分離。"
-  },
-
-
-  {
-    id: 2,
-    question: "最主要的 SQL Injection 防禦方式是？",
-    options: [
-      "WAF 黑名單",
-      "Prepared Statements",
-      "全部轉大寫",
-      "限制輸入長度"
-    ],
-    answer: 1,
-    explanation:
-      "參數化查詢能將 SQL 結構與資料分離。"
-  },
-
-
-  {
-    id: 3,
-    question: "登入繞過中的 OR 1=1 主要作用為何？",
-    options: [
-      "刪除資料",
-      "建立恆真條件",
-      "加密密碼",
-      "停止資料庫"
-    ],
-    answer: 1,
-    explanation:
-      "在特定不安全查詢結構中，恆真條件可能改變原本 WHERE 條件。"
-  },
-
-
-  {
-    id: 4,
-    question: "UNION Injection 的主要用途為何？",
-    options: [
-      "關閉防火牆",
-      "將另一個 SELECT 的結果加入查詢",
-      "加密資料",
-      "修改瀏覽器"
-    ],
-    answer: 1,
-    explanation:
-      "UNION 可以將多個 SELECT 結果集合在一起。"
-  },
-
-
-  {
-    id: 5,
-    question: "UNION SELECT 通常需要符合什麼條件？",
-    options: [
-      "欄位數量相容",
-      "資料表名稱完全相同",
-      "必須使用 HTTPS",
-      "查詢時間小於 1 秒"
-    ],
-    answer: 0,
-    explanation:
-      "UNION 的 SELECT 結果需要具有相容的欄位結構。"
-  },
-
-
-  {
-    id: 6,
-    question: "沒有直接顯示資料時可能使用哪種 SQL Injection？",
-    options: [
-      "XSS",
-      "Blind SQL Injection",
-      "CSRF",
-      "Buffer Overflow"
-    ],
-    answer: 1,
-    explanation:
-      "盲注利用回應差異推測資料。"
-  },
-
-
-  {
-    id: 7,
-    question: "時間盲注可能利用哪類資料庫功能？",
-    options: [
-      "SLEEP / WAITFOR",
-      "FORMAT",
-      "PRINT",
-      "RENAME"
-    ],
-    answer: 0,
-    explanation:
-      "部分資料庫提供可造成延遲的函數或語法。"
-  },
-
-
-  {
-    id: 8,
-    question: "-- 在 SQL 中常見的功能是？",
-    options: [
-      "註解",
-      "建立資料表",
-      "加密",
-      "排序"
-    ],
-    answer: 0,
-    explanation:
-      "在適用的 SQL 方言中，-- 可以開始註解。"
-  },
-
-
-  {
-    id: 9,
-    question: "為什麼單靠 WAF 黑名單不是完整防禦？",
-    options: [
-      "WAF 無法處理 HTTP",
-      "語法可能有許多變形",
-      "WAF 只能處理 DNS",
-      "WAF 只能處理圖片"
-    ],
-    answer: 1,
-    explanation:
-      "單純關鍵字黑名單難以涵蓋所有輸入變形。"
-  },
-
-
-  {
-    id: 10,
-    question: "ORDER BY 動態欄位通常應採用什麼方法？",
-    options: [
-      "直接拼接",
-      "伺服器端白名單",
-      "前端驗證",
-      "刪除單引號"
-    ],
-    answer: 1,
-    explanation:
-      "欄位名稱不能像一般值一樣直接參數化，因此常採白名單。"
-  },
-
-
-  {
-    id: 11,
-    question: "Boolean Blind 的核心概念是什麼？",
-    options: [
-      "比較 True / False 回應",
-      "刪除資料",
-      "關閉資料庫",
-      "修改 DNS"
-    ],
-    answer: 0,
-    explanation:
-      "透過不同條件造成的回應差異推測資訊。"
-  },
-
-
-  {
-    id: 12,
-    question: "Second-Order SQL Injection 的特徵是？",
-    options: [
-      "一次傳兩個封包",
-      "資料先儲存，之後被不安全使用時觸發",
-      "只發生在備份",
-      "只發生在登入"
-    ],
-    answer: 1,
-    explanation:
-      "惡意輸入可能先被儲存，之後在另一個 SQL 操作中被不安全拼接。"
-  },
-
-
-  {
-    id: 13,
-    question: "MySQL 的 Metadata 常見在哪個 Schema？",
-    options: [
-      "sys.master",
-      "information_schema",
-      "config",
-      "metadata.db"
-    ],
-    answer: 1,
-    explanation:
-      "information_schema 提供資料庫物件的 metadata。"
-  },
-
-
-  {
-    id: 14,
-    question: "哪一種驗證可以作為 SQLi 輔助防禦？",
-    options: [
-      "Whitelist",
-      "只做前端驗證",
-      "刪除雙引號",
-      "刪除空白"
-    ],
-    answer: 0,
-    explanation:
-      "白名單可以限制輸入符合預期格式。"
-  },
-
-
-  {
-    id: 15,
-    question: "Prepared Statement 將輸入視為什麼？",
-    options: [
-      "SQL 指令",
-      "純資料",
-      "系統命令",
-      "Macro"
-    ],
-    answer: 1,
-    explanation:
-      "參數化查詢會將參數視為資料而非 SQL 語法。"
-  },
-
-
-  {
-    id: 16,
-    question: "PHP PDO 正確防禦 SQLi 的方式？",
-    options: [
-      "直接字串拼接",
-      "prepare + execute",
-      "exec 拼接",
-      "刪除單引號"
-    ],
-    answer: 1,
-    explanation:
-      "PDO 的 prepare 與參數綁定是常見安全做法。"
-  },
-
-
-  {
-    id: 17,
-    question: "為什麼測試 UNION 時可能先讓原查詢為 False？",
-    options: [
-      "讓 UNION 結果更容易觀察",
-      "增加密碼長度",
-      "啟動 WAF",
-      "加密資料"
-    ],
-    answer: 0,
-    explanation:
-      "在教學環境中，可以透過空結果降低原始資料對展示結果的干擾。"
-  },
-
-
-  {
-    id: 18,
-    question: "ORM 是否代表一定沒有 SQL Injection？",
-    options: [
-      "一定安全",
-      "通常有參數化，但 Raw SQL 仍可能存在風險",
-      "一定有漏洞",
-      "只能防 XSS"
-    ],
-    answer: 1,
-    explanation:
-      "ORM 能降低風險，但不代表所有原生 SQL 操作都安全。"
-  },
-
-
-  {
-    id: 19,
-    question: "ORDER BY 數字測試通常可以協助了解什麼？",
-    options: [
-      "資料欄位數量",
-      "網路速度",
-      "密碼長度",
-      "CPU 溫度"
-    ],
-    answer: 0,
-    explanation:
-      "在特定 SQL Injection 測試情境中，可利用錯誤回應推測欄位數。"
-  },
-
-
-  {
-    id: 20,
-    question: "寬位元組注入與什麼有關？",
-    options: [
-      "編碼與字元解析",
-      "CPU 超頻",
-      "圖片格式",
-      "網路頻寬"
-    ],
-    answer: 0,
-    explanation:
-      "某些舊式多位元組編碼環境可能產生特殊的字元解析問題。"
-  }
-
-];
-
-
-/* =========================================================
-   TAB SYSTEM
-========================================================= */
-
-function switchTab(tabId) {
-
-  const tabs = [
-    "learn",
-    "sandbox",
-    "defense",
-    "quiz",
-    "solutions"
-  ];
-
-  tabs.forEach(tab => {
-
-    const section =
-      document.getElementById("tab-" + tab);
-
-    const nav =
-      document.getElementById("nav-" + tab);
-
-    if (tab === tabId) {
-
-      section.classList.remove("hidden");
-
-      nav.className =
-        "px-3 py-1.5 rounded-lg text-indigo-600 bg-indigo-50 font-semibold";
-
-    } else {
-
-      section.classList.add("hidden");
-
-      nav.className =
-        "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900";
-
-    }
-
-  });
-
-  if (tabId === "sandbox") {
-
-    updatePayloadButtons();
-    runSandbox();
-
-  }
-
-}
-
-
-/* =========================================================
-   DEFENSE TABS
-========================================================= */
-
-function setDefenseTab(lang) {
-
-  const langs = [
-    "python",
-    "node",
-    "php",
-    "java"
-  ];
-
-  langs.forEach(item => {
-
-    const button =
-      document.getElementById("dtab-" + item);
-
-    const code =
-      document.getElementById("dcode-" + item);
-
-    if (item === lang) {
-
-      button.className =
-        "pb-2 text-sm font-bold border-b-2 " +
-        "border-indigo-600 text-indigo-600";
-
-      code.classList.remove("hidden");
-
-    } else {
-
-      button.className =
-        "pb-2 text-sm font-bold text-slate-500";
-
-      code.classList.add("hidden");
-
-    }
-
-  });
-
-}
-
-
-/* =========================================================
-   SANDBOX MODE
-========================================================= */
-
-function setSandboxMode(mode) {
-
-  currentSandboxMode = mode;
-
-  const vuln =
-    document.getElementById("mode-vuln");
-
-  const safe =
-    document.getElementById("mode-safe");
-
-  if (mode === "vulnerable") {
-
-    vuln.className =
-      "px-3 py-2 text-xs font-bold rounded-md " +
-      "bg-white text-red-600 shadow-sm";
-
-    safe.className =
-      "px-3 py-2 text-xs font-bold rounded-md text-slate-600";
-
-  } else {
-
-    vuln.className =
-      "px-3 py-2 text-xs font-bold rounded-md text-slate-600";
-
-    safe.className =
-      "px-3 py-2 text-xs font-bold rounded-md " +
-      "bg-white text-emerald-600 shadow-sm";
-
-  }
-
-  runSandbox();
-
-}
-
-
-/* =========================================================
-   PAYLOAD BUTTONS
-========================================================= */
-
-function updatePayloadButtons() {
-
-  const scenario =
-    document.getElementById("sb-scenario").value;
-
-  const container =
-    document.getElementById("sb-payload-container");
-
-  container.innerHTML = "";
-
-  const payloads =
-    scenarioPayloads[scenario] || [];
-
-  payloads.forEach(payload => {
-
-    const button =
-      document.createElement("button");
-
-    button.className =
-      "px-2 py-1 bg-slate-100 " +
-      "hover:bg-indigo-50 hover:text-indigo-600 " +
-      "border border-slate-200 text-[11px] " +
-      "rounded transition font-mono";
-
-    button.textContent =
-      payload.label;
-
-    button.onclick = function () {
-
-      document.getElementById("sb-input").value =
-        payload.value;
-
-      runSandbox();
-
-    };
-
-    container.appendChild(button);
-
-  });
-
-}
-
-
-/* =========================================================
-   SANDBOX
-========================================================= */
-
-function runSandbox() {
-
-  const scenario =
-    document.getElementById("sb-scenario").value;
-
-  const input =
-    document.getElementById("sb-input").value;
-
-  const sqlDisplay =
-    document.getElementById("sb-sql-display");
-
-  const tokensDisplay =
-    document.getElementById("sb-tokens-display");
-
-  const dbRows =
-    document.getElementById("sb-db-rows");
-
-  const rowCount =
-    document.getElementById("sb-row-count");
-
-  const status =
-    document.getElementById("sb-status-badge");
-
-  const analysis =
-    document.getElementById("sb-analysis");
-
-  const outputLog =
-    document.getElementById("sb-output-log");
-
-
-  if (sleepInterval) {
-
-    clearInterval(sleepInterval);
-    sleepInterval = null;
-
-  }
-
-  document
-    .getElementById("sleep-timer-bar")
-    .classList.add("hidden");
-
-
-  let sql = "";
-  let results = [];
-  let exploited = false;
-
-  let log = "Query executed.";
-
-  let explanation = "";
-
-
-  /* =======================================================
-     GENERATE SQL
-  ======================================================= */
-
-  if (currentSandboxMode === "vulnerable") {
-
-    switch (scenario) {
-
-      case "login":
-
-        sql =
-          `SELECT * FROM users WHERE username = '${input}' AND password = '***'`;
-
-        break;
-
-
-      case "union":
-
-        sql =
-          `SELECT id, username, role FROM users WHERE username = '${input}'`;
-
-        break;
-
-
-      case "blind":
-
-        sql =
-          `SELECT * FROM users WHERE username = '${input}'`;
-
-        break;
-
-
-      case "sleep":
-
-        sql =
-          `SELECT * FROM users WHERE username = '${input}'`;
-
-        break;
-
-
-      case "orderby":
-
-        sql =
-          `SELECT id, username, role FROM users ORDER BY ${input || "id"}`;
-
-        break;
-
-
-      case "waf":
-
-        sql =
-          `SELECT * FROM users WHERE username = '${input}'`;
-
-        break;
-
-    }
-
-  } else {
-
-    switch (scenario) {
-
-      case "login":
-
-        sql =
-          `PREPARED STATEMENT:
-SELECT * FROM users WHERE username = ? AND password = ?`;
-
-        break;
-
-
-      case "union":
-
-        sql =
-          `PREPARED STATEMENT:
-SELECT id, username, role FROM users WHERE username = ?`;
-
-        break;
-
-
-      case "blind":
-
-        sql =
-          `PREPARED STATEMENT:
-SELECT * FROM users WHERE username = ?`;
-
-        break;
-
-
-      case "sleep":
-
-        sql =
-          `PREPARED STATEMENT:
-SELECT * FROM users WHERE username = ?`;
-
-        break;
-
-
-      case "orderby": {
-
-        const allowed =
-          ["id", "username", "role"];
-
-        const safeColumn =
-          allowed.includes(input.trim())
-            ? input.trim()
-            : "id";
-
-        sql =
-          `SELECT id, username, role FROM users ORDER BY ${safeColumn}
--- Whitelist Enforced`;
-
-        break;
-      }
-
-
-      case "waf":
-
-        sql =
-          `PREPARED STATEMENT:
-SELECT * FROM users WHERE username = ?`;
-
-        break;
-
-    }
-
-  }
-
-
-  sqlDisplay.textContent = sql;
-
-  renderTokens(
-    sql,
-    tokensDisplay
-  );
-
-
-  /* =======================================================
-     VULNERABLE MODE
-  ======================================================= */
-
-  if (currentSandboxMode === "vulnerable") {
-
-    switch (scenario) {
-
-
-      case "login":
-
-        if (
-          input.includes("' OR '1'='1") ||
-          input.includes("' OR 1=1") ||
-          input.includes("admin'--")
-        ) {
-
-          results = mockDBUsers;
-
-          exploited = true;
-
-          log =
-            "SIMULATION: Authentication condition changed.";
-
-          explanation =
-            "🔴 <strong>登入繞過模擬：</strong> " +
-            "輸入內容改變原本 WHERE 條件的邏輯。" ;
-
-        }
-
-        else {
-
-          results =
-            mockDBUsers.filter(
-              user => user.username === input
-            );
-
-          explanation =
-            "🔵 <strong>正常查詢：</strong> " +
-            "只搜尋指定帳號。";
-
-        }
-
-        break;
-
-
-      case "union":
-
-        if (
-          input.toLowerCase().includes("union select")
-        ) {
-
-          results =
-            mockDBUsers.map(user => ({
-              id: user.id,
-              username: user.username,
-              role:
-                user.role +
-                " (Demo data)"
-            }));
-
-          exploited = true;
-
-          log =
-            "SIMULATION: UNION result merged.";
-
-          explanation =
-            "🔴 <strong>UNION Injection 模擬：</strong> " +
-            "展示非預期 SELECT 結果被加入查詢結果。";
-
-        }
-
-        else {
-
-          results =
-            mockDBUsers.filter(
-              user => user.username === input
-            );
-
-          explanation =
-            "⚪ <strong>正常搜尋：</strong> " +
-            "目前沒有偵測到 UNION 模擬。";
-
-        }
-
-        break;
-
-
-      case "blind":
-
-        if (
-          input.includes("1='1") ||
-          input.includes("LENGTH(database())=4")
-        ) {
-
-          results = [mockDBUsers[0]];
-
-          exploited = true;
-
-          log =
-            "Boolean condition evaluated as TRUE.";
-
-          explanation =
-            "🔴 <strong>Boolean Blind：</strong> " +
-            "模擬 True 條件造成可觀察回應。";
-
-        }
-
-        else if (
-          input.includes("1='2")
-        ) {
-
-          results = [];
-
-          exploited = true;
-
-          log =
-            "Boolean condition evaluated as FALSE.";
-
-          explanation =
-            "🟠 <strong>Boolean Blind：</strong> " +
-            "模擬 False 條件造成不同回應。";
-
-        }
-
-        else {
-
-          results =
-            mockDBUsers.filter(
-              user => user.username === input
-            );
-
-          explanation =
-            "⚪ <strong>正常搜尋。</strong>";
-
-        }
-
-        break;
-
-
-      case "sleep":
-
-        if (
-          input.toUpperCase().includes("SLEEP(")
-        ) {
-
-          exploited = true;
-
-          log =
-            "SIMULATION: Database response delay triggered.";
-
-          explanation =
-            "🔴 <strong>Time-Based Blind：</strong> " +
-            "模擬資料庫延遲回應。";
-
-          triggerSleepAnimation(3);
-
-        }
-
-        else {
-
-          results =
-            mockDBUsers.filter(
-              user => user.username === input
-            );
-
-          explanation =
-            "⚪ <strong>正常搜尋。</strong>";
-
-        }
-
-        break;
-
-
-      case "orderby":
-
-        if (
-          input.toLowerCase().includes("select") ||
-          input.toLowerCase().includes("if(")
-        ) {
-
-          results =
-            [...mockDBUsers].reverse();
-
-          exploited = true;
-
-          log =
-            "SIMULATION: ORDER BY expression altered.";
-
-          explanation =
-            "🔴 <strong>ORDER BY Injection：</strong> " +
-            "模擬動態排序邏輯被改變。";
-
-        }
-
-        else {
-
-          const allowed =
-            ["id", "username", "role"];
-
-          if (allowed.includes(input.trim())) {
-
-            const column =
-              input.trim();
-
-            results =
-              [...mockDBUsers].sort(
-                (a, b) =>
-                  String(a[column])
-                    .localeCompare(String(b[column]))
-              );
-
-            explanation =
-              "🔵 <strong>正常排序：</strong> " +
-              "使用合法欄位。";
-
-          }
-
-          else {
-
-            results = mockDBUsers;
-
-            explanation =
-              "⚪ <strong>預設排序：</strong> " +
-              "未知欄位使用預設結果。";
-
-          }
-
-        }
-
-        break;
-
-
-      case "waf":
-
-        if (
-          input === "admin' OR '1'='1"
-        ) {
-
-          results = [];
-
-          log =
-            "SIMULATION: WAF blacklist blocked input.";
-
-          explanation =
-            "🛡️ <strong>WAF 模擬：</strong> " +
-            "黑名單偵測到特定模式。";
-
-        }
-
-        else if (
-          input.includes("oR") ||
-          input.includes("/**/")
-        ) {
-
-          results = mockDBUsers;
-
-          exploited = true;
-
-          log =
-            "SIMULATION: WAF pattern bypassed.";
-
-          explanation =
-            "🟠 <strong>WAF 模擬：</strong> " +
-            "不同字串表示方式可能無法被簡單黑名單完整涵蓋。";
-
-        }
-
-        else {
-
-          results =
-            mockDBUsers.filter(
-              user => user.username === input
-            );
-
-          explanation =
-            "⚪ <strong>正常查詢。</strong>";
-
-        }
-
-        break;
-
-    }
-
-  }
-
-
-  /* =======================================================
-     SECURE MODE
-  ======================================================= */
-
-  else {
-
-    exploited = false;
-
-    log =
-      "PREPARED / WHITELIST SIMULATION: input treated as data.";
-
-    if (scenario === "orderby") {
-
-      const allowed =
-        ["id", "username", "role"];
-
-      const safeColumn =
-        allowed.includes(input.trim())
-          ? input.trim()
-          : "id";
-
-      results =
-        [...mockDBUsers].sort(
-          (a, b) =>
-            String(a[safeColumn])
-              .localeCompare(String(b[safeColumn]))
-        );
-
-      explanation =
-        "🟢 <strong>Whitelist 防禦：</strong> " +
-        "只有允許欄位才能作為排序欄位。";
-
-    }
-
-    else {
-
-      results =
-        mockDBUsers.filter(
-          user => user.username === input
-        );
-
-      explanation =
-        "🟢 <strong>Prepared Statement 防禦：</strong> " +
-        "輸入被當成資料，而不是 SQL 語法。";
-
-    }
-
-  }
-
-
-  /* =======================================================
-     STATUS
-  ======================================================= */
-
-  if (exploited) {
-
-    status.className =
-      "px-3 py-1 rounded-full text-xs font-bold " +
-      "bg-red-100 text-red-800";
-
-    status.textContent =
-      "狀態：偵測到 SQL Injection 模擬";
-
-  }
-
-  else if (currentSandboxMode === "secure") {
-
-    status.className =
-      "px-3 py-1 rounded-full text-xs font-bold " +
-      "bg-emerald-100 text-emerald-800";
-
-    status.textContent =
-      "狀態：Secure Mode";
-
-  }
-
-  else {
-
-    status.className =
-      "px-3 py-1 rounded-full text-xs font-bold " +
-      "bg-slate-100 text-slate-800";
-
-    status.textContent =
-      "狀態：正常";
-
-  }
-
-
-  analysis.innerHTML =
-    explanation;
-
-  outputLog.textContent =
-    log;
-
-  rowCount.textContent =
-    `Row Count: ${results.length}`;
-
-
-  /* =======================================================
-     TABLE
-  ======================================================= */
-
-  dbRows.innerHTML = "";
-
-
-  if (results.length === 0) {
-
-    dbRows.innerHTML = `
-      <tr>
-        <td colspan="3"
-            class="p-5 text-center text-slate-400">
-          查無資料
-        </td>
-      </tr>
-    `;
-
-  }
-
-  else {
-
-    results.forEach(row => {
-
-      const tr =
-        document.createElement("tr");
-
-      tr.className =
-        "hover:bg-slate-50";
-
-      tr.innerHTML = `
-        <td class="p-2">
-          ${escapeHtml(row.id)}
-        </td>
-
-        <td class="p-2 font-bold">
-          ${escapeHtml(row.username)}
-        </td>
-
-        <td class="p-2 text-indigo-600">
-          ${escapeHtml(row.role)}
-        </td>
-      `;
-
-      dbRows.appendChild(tr);
-
-    });
-
-  }
-
-}
-
-
-/* =========================================================
-   TOKENIZER
-========================================================= */
-
-function renderTokens(sql, container) {
-
-  container.innerHTML = "";
-
-  if (!sql) {
-
-    container.textContent = "--";
-    return;
-
-  }
-
-
-  const tokens =
-    sql.match(
-      /--.*|\/\*.*?\*\/|'[^']*'|\b[A-Za-z_]+\b|\S/g
-    ) || [];
-
-
-  tokens.forEach(token => {
-
-    const span =
-      document.createElement("span");
-
-    span.className =
-      "px-1.5 py-0.5 rounded text-[10px] " +
-      "font-mono border";
-
-
-    const upper =
-      token.toUpperCase();
-
-
-    if (
-      [
-        "SELECT",
-        "FROM",
-        "WHERE",
-        "AND",
-        "OR",
-        "UNION",
-        "ORDER",
-        "BY",
-        "PREPARED",
-        "STATEMENT"
-      ].includes(upper)
-    ) {
-
-      span.className +=
-        " bg-indigo-900 text-indigo-300 border-indigo-700";
-
-    }
-
-    else if (
-      token.startsWith("'")
-    ) {
-
-      span.className +=
-        " bg-amber-950 text-amber-300 border-amber-800";
-
-    }
-
-    else if (
-      token.startsWith("--") ||
-      token.startsWith("/*")
-    ) {
-
-      span.className +=
-        " bg-slate-800 text-slate-500 border-slate-700";
-
-    }
-
-    else {
-
-      span.className +=
-        " bg-slate-900 text-slate-300 border-slate-800";
-
-    }
-
-
-    span.textContent =
-      token;
-
-    container.appendChild(span);
-
-  });
-
-}
-
-
-/* =========================================================
-   SLEEP ANIMATION
-========================================================= */
-
-function triggerSleepAnimation(seconds) {
-
-  const bar =
-    document.getElementById("sleep-timer-bar");
-
-  const progress =
-    document.getElementById("sleep-progress");
-
-  const countdown =
-    document.getElementById("sleep-countdown");
-
-
-  bar.classList.remove("hidden");
-
-  progress.style.width = "0%";
-
-
-  let elapsed = 0;
-
-  const total =
-    seconds * 1000;
-
-
-  sleepInterval =
-    setInterval(() => {
-
-      elapsed += 50;
-
-      const percent =
-        Math.min(
-          100,
-          elapsed / total * 100
-        );
-
-      progress.style.width =
-        percent + "%";
-
-
-      const remaining =
-        Math.max(
-          0,
-          (total - elapsed) / 1000
-        );
-
-
-      countdown.textContent =
-        remaining.toFixed(1) + "s";
-
-
-      if (elapsed >= total) {
-
-        clearInterval(sleepInterval);
-
-        sleepInterval = null;
-
-        countdown.textContent =
-          "0.0s（完成）";
-
-      }
-
-    }, 50);
-
-}
-
-
-/* =========================================================
-   HTML ESCAPE
-========================================================= */
-
-function escapeHtml(value) {
-
-  return String(value)
-
-    .replace(/&/g, "&amp;")
-
-    .replace(/</g, "&lt;")
-
-    .replace(/>/g, "&gt;")
-
-    .replace(/"/g, "&quot;")
-
-    .replace(/'/g, "&#039;");
-
-}
-
-
-/* =========================================================
-   QUIZ
-========================================================= */
-
-function startQuiz(event) {
-
-  event.preventDefault();
-
-
-  const cls =
-    document.getElementById("user-class")
-      .value.trim();
-
-  const seat =
-    document.getElementById("user-seat")
-      .value.trim();
-
-  const name =
-    document.getElementById("user-name")
-      .value.trim();
-
-
-  if (!cls || !seat || !name) {
-
-    alert("請完整填寫資料。");
-    return;
-
-  }
-
-
-  currentQuizUser = {
-    cls,
-    seat,
-    name
-  };
-
-
-  activeQuizQuestions =
-    [...questionBank]
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 10);
-
-
-  document
-    .getElementById("quiz-auth-card")
-    .classList.add("hidden");
-
-
-  document
-    .getElementById("quiz-window")
-    .classList.remove("hidden");
-
-
-  document
-    .getElementById("quiz-display-user")
-    .textContent =
-      `${cls} / ${seat}號 / ${name}`;
-
-
-  renderQuizQuestions();
-
-}
-
-
-/* =========================================================
-   RENDER QUIZ
-========================================================= */
-
-function renderQuizQuestions() {
-
-  const container =
-    document.getElementById(
-      "quiz-questions-container"
-    );
-
-
-  container.innerHTML = "";
-
-
-  activeQuizQuestions.forEach(
-    (question, index) => {
-
-      const card =
-        document.createElement("div");
-
-      card.className =
-        "bg-white rounded-xl p-5 " +
-        "border border-slate-200 shadow-sm";
-
-
-      let optionsHtml = "";
-
-
-      question.options.forEach(
-        (option, optionIndex) => {
-
-          optionsHtml += `
-
-            <label
-              class="flex gap-2 p-2 rounded-lg
-                     hover:bg-slate-50 cursor-pointer">
-
-              <input
-                type="radio"
-                name="quiz-q-${question.id}"
-                value="${optionIndex}"
-                class="mt-1">
-
-              <span class="text-xs text-slate-700">
-                ${escapeHtml(option)}
-              </span>
-
-            </label>
-
-          `;
-
-        }
-      );
-
-
-      card.innerHTML = `
-
-        <div class="font-bold text-sm mb-3">
-
-          <span class="text-indigo-600">
-            Q${index + 1}.
-          </span>
-
-          ${escapeHtml(question.question)}
-
-        </div>
-
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- HEADER / NAVBAR -->
+  <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="bg-red-600 p-2 rounded-lg font-bold text-white tracking-widest text-sm">SQLi</div>
         <div>
-          ${optionsHtml}
+          <h1 class="text-lg font-bold leading-tight">SQL Injection 互動式教學與防禦實驗室</h1>
+          <p class="text-xs text-slate-400">資安實務互動課程 · 漏洞剖析與參數化查詢防禦</p>
         </div>
-
-      `;
-
-
-      container.appendChild(card);
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   SUBMIT QUIZ
-========================================================= */
-
-function submitQuiz() {
-
-  let score = 0;
-
-  let correct = 0;
-
-
-  activeQuizQuestions.forEach(
-    question => {
-
-      const selected =
-        document.querySelector(
-          `input[name="quiz-q-${question.id}"]:checked`
-        );
-
-
-      if (
-        selected &&
-        Number(selected.value) === question.answer
-      ) {
-
-        score += 10;
-        correct++;
-
-      }
-
-    }
-  );
-
-
-  document
-    .getElementById("quiz-window")
-    .classList.add("hidden");
-
-
-  document
-    .getElementById("quiz-result-card")
-    .classList.remove("hidden");
-
-
-  document
-    .getElementById("result-user-info")
-    .textContent =
-      `考生：${currentQuizUser.cls} ` +
-      `${currentQuizUser.seat}號 ` +
-      `${currentQuizUser.name}`;
-
-
-  document
-    .getElementById("result-score")
-    .textContent =
-      score;
-
-
-  document
-    .getElementById("result-count")
-    .textContent =
-      correct;
-
-}
-
-
-/* =========================================================
-   RETAKE
-========================================================= */
-
-function retakeQuiz() {
-
-  document
-    .getElementById("quiz-result-card")
-    .classList.add("hidden");
-
-
-  document
-    .getElementById("quiz-auth-card")
-    .classList.remove("hidden");
-
-}
-
-
-/* =========================================================
-   TEACHER LOGIN
-========================================================= */
-
-function teacherPromptUnlock() {
-
-  const toggle =
-    document.getElementById("publish-toggle");
-
-  toggle.checked = true;
-
-  togglePublishAnswers();
-
-}
-
-
-/* =========================================================
-   TEACHER SOLUTION
-========================================================= */
-
-function togglePublishAnswers() {
-
-  const toggle =
-    document.getElementById("publish-toggle");
-
-  const status =
-    document.getElementById("publish-status-text");
-
-  const locked =
-    document.getElementById("solutions-locked-msg");
-
-  const content =
-    document.getElementById(
-      "solutions-unlocked-content"
-    );
-
-
-  if (toggle.checked) {
-
-    const password =
-      prompt(
-        "請輸入教師管理密碼："
-      );
-
-
-    /*
-     * BUG FIX:
-     *
-     * 原本：
-     * if (pass === teacher123)
-     *
-     * 現在：
-     * if (password === TEACHER_PASSWORD)
-     */
-
-    if (password === TEACHER_PASSWORD) {
-
-      status.textContent =
-        "目前狀態：已公佈答案";
-
-      status.className =
-        "text-xs font-bold text-emerald-400";
-
-
-      locked.classList.add("hidden");
-
-      content.classList.remove("hidden");
-
-
-      renderAllSolutions();
-
-    }
-
-    else {
-
-      alert(
-        "教師密碼錯誤。"
-      );
-
-      toggle.checked = false;
-
-    }
-
-  }
-
-  else {
-
-    status.textContent =
-      "目前狀態：未公佈";
-
-    status.className =
-      "text-xs font-bold text-amber-400";
-
-
-    locked.classList.remove("hidden");
-
-    content.classList.add("hidden");
-
-  }
-
-}
-
-
-/* =========================================================
-   RENDER SOLUTIONS
-========================================================= */
-
-function renderAllSolutions() {
-
-  const container =
-    document.getElementById(
-      "solutions-unlocked-content"
-    );
-
-
-  container.innerHTML = "";
-
-
-  questionBank.forEach(
-    (question, index) => {
-
-      const card =
-        document.createElement("div");
-
-      card.className =
-        "bg-white rounded-xl p-5 " +
-        "border border-slate-200 shadow-sm";
-
-
-      let options = "";
-
-
-      question.options.forEach(
-        (option, optionIndex) => {
-
-          const correct =
-            optionIndex === question.answer;
-
-
-          options += `
-
-            <div
-              class="p-2 rounded-lg
-              ${
-                correct
-                  ? "bg-emerald-50 border border-emerald-200 font-bold text-emerald-900"
-                  : "text-slate-600"
-              }">
-
-              ${correct ? "✅" : "○"}
-
-              ${escapeHtml(option)}
-
-            </div>
-
-          `;
-
-        }
-      );
-
-
-      card.innerHTML = `
-
-        <div class="flex flex-col md:flex-row
-                    justify-between gap-2">
-
-          <div class="font-bold text-sm">
-
-            <span class="text-indigo-600">
-              第 ${index + 1} 題
-            </span>
-
-            ${escapeHtml(question.question)}
-
+      </div>
+
+      <!-- MAIN NAVIGATION -->
+      <nav class="flex items-center space-x-1 bg-slate-800 p-1 rounded-xl text-xs md:text-sm">
+        <button onclick="switchTab('learn')" id="nav-learn" class="px-3 py-1.5 rounded-lg transition text-indigo-600 bg-indigo-50 font-semibold">1. 原理剖析</button>
+        <button onclick="switchTab('sandbox')" id="nav-sandbox" class="px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">2. 互動沙盒</button>
+        <button onclick="switchTab('defense')" id="nav-defense" class="px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">3. 防禦程式碼</button>
+        <button onclick="switchTab('quiz')" id="nav-quiz" class="px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">4. 隨堂測驗</button>
+        <button onclick="switchTab('solutions')" id="nav-solutions" class="px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">5. 解答控制</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
+
+    <!-- TAB 1: LEARN (原理剖析) -->
+    <section id="tab-learn" class="space-y-6">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+        <h2 class="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
+          <span class="w-2 h-6 bg-indigo-600 rounded-full inline-block"></span>
+          什麼是 SQL Injection (SQL 隱碼注入)？
+        </h2>
+        <p class="text-slate-600 leading-relaxed text-sm mb-4">
+          SQL Injection (SQLi) 是一種發生於應用程式與資料庫互動時的重大安全漏洞。當程式碼將**使用者未經過濾的輸入**直接以字串拼接的方式組合進 SQL 查詢語句時，攻擊者可以透過注入惡意的 SQL 語法碎片，藉此破壞原有的查詢邏輯，甚至控制整個資料庫。
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          <div class="p-4 rounded-xl border border-red-200 bg-red-50/50 space-y-2">
+            <h3 class="font-bold text-red-900 text-sm flex items-center gap-1.5">
+              <span>⚠️</span> 核心致病原因
+            </h3>
+            <p class="text-xs text-red-700 leading-relaxed">
+              將「資料 (Data)」與「指令 (Code)」混淆。程式碼使用動態字串拼接（如 <code>+</code> 或 <code>f-string</code>），使傳入的資料被資料庫直譯器誤認為新的 SQL 關鍵字或結構。
+            </p>
           </div>
 
+          <div class="p-4 rounded-xl border border-amber-200 bg-amber-50/50 space-y-2">
+            <h3 class="font-bold text-amber-900 text-sm flex items-center gap-1.5">
+              <span>💥</span> 潛在危害風險
+            </h3>
+            <p class="text-xs text-amber-700 leading-relaxed">
+              未授權繞過登入驗證、跨表竊取機密資料（機密性破壞）、隨意修改或刪除資料庫表格（完整性破壞），嚴重時可取得作業系統 Shell 權限。
+            </p>
+          </div>
 
-          <span
-            class="px-2 py-1 bg-emerald-100
-                   text-emerald-800 rounded
-                   text-xs font-bold">
+          <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-2">
+            <h3 class="font-bold text-emerald-900 text-sm flex items-center gap-1.5">
+              <span>🛡️</span> 根治解決方案
+            </h3>
+            <p class="text-xs text-emerald-700 leading-relaxed">
+              徹底放棄動態字串拼接！改採**預編譯參數化查詢 (Prepared Statements)**，將 SQL 語法結構事先編譯，讓輸入值永遠僅被當成純字串參數處裡。
+            </p>
+          </div>
+        </div>
+      </div>
 
-            標準答案：
-            ${String.fromCharCode(
-              65 + question.answer
-            )}
+      <!-- SQLi 類型簡介 -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+        <h3 class="text-lg font-bold text-slate-900 mb-4">常見 SQL Injection 攻擊型態</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+          <div class="p-4 border border-slate-200 rounded-xl bg-slate-50 space-y-1.5">
+            <div class="font-bold text-indigo-600 text-sm">1. 身分驗證繞過 (In-band)</div>
+            <p class="text-slate-600">透過布林邏輯恆真（如 <code>' OR '1'='1</code>）或註解符號（<code>'--</code>），使密碼比對邏輯失效直接登入。</p>
+          </div>
+          <div class="p-4 border border-slate-200 rounded-xl bg-slate-50 space-y-1.5">
+            <div class="font-bold text-indigo-600 text-sm">2. UNION 跨表查詢 (In-band)</div>
+            <p class="text-slate-600">利用 <code>UNION SELECT</code> 將別的資料表（如 users, credit_cards）的結果強行附加在原本查詢輸出中。</p>
+          </div>
+          <div class="p-4 border border-slate-200 rounded-xl bg-slate-50 space-y-1.5">
+            <div class="font-bold text-indigo-600 text-sm">3. 布林型盲注 (Boolean-Blind)</div>
+            <p class="text-slate-600">畫面不直接回傳資料，但可透過頁面回應是否正常（True/False），一步步逐字爆破逐字猜測。</p>
+          </div>
+          <div class="p-4 border border-slate-200 rounded-xl bg-slate-50 space-y-1.5">
+            <div class="font-bold text-indigo-600 text-sm">4. 時間延遲型盲注 (Time-Blind)</div>
+            <p class="text-slate-600">頁面不顯示任何差異時，透過 <code>SLEEP(3)</code> 等函數強迫資料庫延遲回應，藉由 Response Time 推斷條件。</p>
+          </div>
+          <div class="p-4 border border-slate-200 rounded-xl bg-slate-50 space-y-1.5">
+            <div class="font-bold text-indigo-600 text-sm">5. ORDER BY 動態排序</div>
+            <p class="text-slate-600">無法直接對 ORDER BY 進行參數化綁定，若直接拼接欄位名將造成極具威脅的盲注點，需用白名單防禦。</p>
+          </div>
+          <div class="p-4 border border-slate-200 rounded-xl bg-slate-50 space-y-1.5">
+            <div class="font-bold text-indigo-600 text-sm">6. WAF 過濾與繞過</div>
+            <p class="text-slate-600">依賴簡單黑名單（過濾單詞）的 WAF 容易被大小寫混淆（<code>oR</code>）或註解（<code>/**/</code>）繞過，非根本解決之道。</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-          </span>
+    <!-- TAB 2: SANDBOX (互動沙盒) -->
+    <section id="tab-sandbox" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
+        <!-- 左側控制面板 -->
+        <div class="lg:col-span-5 bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h3 class="font-bold text-slate-900 text-base">⚙️ 實驗控制台</h3>
+            <!-- 模式切換器 -->
+            <div class="flex bg-slate-100 p-1 rounded-lg">
+              <button id="mode-vuln" onclick="setSandboxMode('vulnerable')" class="px-3 py-1 text-xs font-bold rounded-md bg-white text-red-600 shadow-sm transition">漏洞模式 (拼接)</button>
+              <button id="mode-safe" onclick="setSandboxMode('secure')" class="px-3 py-1 text-xs font-bold rounded-md text-slate-600 hover:text-slate-900 transition">防禦模式 (預編譯)</button>
+            </div>
+          </div>
+
+          <!-- 情境選擇器 -->
+          <div class="space-y-1">
+            <label class="text-xs font-semibold text-slate-600">選擇攻擊/測試情境：</label>
+            <select id="sb-scenario" onchange="updatePayloadButtons(); runSandbox();" class="w-full text-xs border-slate-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+              <option value="login">1. 身分驗證繞過 [Login Bypass]</option>
+              <option value="union">2. UNION 跨表聯合查詢 [UNION-Based]</option>
+              <option value="blind">3. 布林型盲注 [Boolean Blind]</option>
+              <option value="sleep">4. 時間延遲型盲注 [Time-Based SLEEP()]</option>
+              <option value="orderby">5. ORDER BY 動態排序白名單 [Whitelist Guard]</option>
+              <option value="waf">6. WAF 過濾與繞過實驗 [WAF Bypass]</option>
+            </select>
+          </div>
+
+          <!-- 預設常用 Payload (動態連動選單) -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-500">預設常用 Payload (點擊自動填入)：</label>
+            <div id="sb-payload-container" class="flex flex-wrap gap-1.5">
+              <!-- 按鈕由 JavaScript 依情境動態生成 -->
+            </div>
+          </div>
+
+          <!-- 輸入區域 -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-600">使用者輸入值 (User Input)：</label>
+            <textarea id="sb-input" rows="3" onkeyup="runSandbox()" class="w-full p-2.5 text-xs font-mono border-slate-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-slate-50"></textarea>
+          </div>
+
+          <!-- SLEEP 計時指示條 -->
+          <div id="sleep-timer-bar" class="hidden p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-1">
+            <div class="flex justify-between text-xs font-bold text-amber-800">
+              <span>⏱️ 資料庫 SLEEP 延遲執行中...</span>
+              <span id="sleep-countdown">3.0s</span>
+            </div>
+            <div class="w-full bg-amber-200 rounded-full h-2 overflow-hidden">
+              <div id="sleep-progress" class="bg-amber-600 h-2 w-0 transition-all duration-75"></div>
+            </div>
+          </div>
         </div>
 
+        <!-- 右側展示面板 -->
+        <div class="lg:col-span-7 space-y-4">
+          <!-- SQL 語句即時組合卡片 -->
+          <div class="bg-slate-900 text-slate-100 p-5 rounded-2xl shadow-sm space-y-3">
+            <div class="flex justify-between items-center text-xs text-slate-400">
+              <span class="font-semibold uppercase tracking-wider">即時 SQL 查詢語句 (Backend Generated SQL)</span>
+              <span id="sb-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">狀態：正常執行</span>
+            </div>
+            <pre id="sb-sql-display" class="font-mono text-xs overflow-x-auto text-emerald-400 p-3 bg-slate-950 rounded-lg border border-slate-800 whitespace-pre-wrap break-all"></pre>
+            
+            <!-- SQL Lexer / Token 視覺化展示 -->
+            <div class="space-y-1 pt-1">
+              <div class="text-[11px] text-slate-400 font-semibold">SQL 語法解析器視角 (Token Parsing)：</div>
+              <div id="sb-tokens-display" class="flex flex-wrap gap-1.5 p-2 bg-slate-950 rounded-lg border border-slate-800"></div>
+            </div>
+          </div>
 
-        <div class="space-y-1 mt-3">
-          ${options}
+          <!-- 資料庫回傳結果與日誌 -->
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-3">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+              <h4 class="font-bold text-slate-800 text-sm">📊 資料庫查詢結果與回應 (Query Result)</h4>
+              <span id="sb-row-count" class="text-xs text-slate-500 font-mono">Row Count: 0</span>
+            </div>
+
+            <!-- 分析與解說提示框 -->
+            <div id="sb-analysis" class="p-3 text-xs rounded-xl bg-slate-50 border border-slate-200 text-slate-700 leading-relaxed"></div>
+
+            <div class="overflow-x-auto border border-slate-100 rounded-lg">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-100">
+                  <tr>
+                    <th class="p-2.5">ID</th>
+                    <th class="p-2.5">Username</th>
+                    <th class="p-2.5">Role / Content</th>
+                  </tr>
+                </thead>
+                <tbody id="sb-db-rows" class="divide-y divide-slate-100 font-mono">
+                  <!-- JS 會填入結果 Row -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- 後端 Console Log -->
+            <div class="bg-slate-950 text-slate-300 p-2.5 rounded-lg text-[11px] font-mono border border-slate-800">
+              <span class="text-slate-500">[Server Log]:</span> <span id="sb-output-log">Waiting for input...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: DEFENSE (防禦程式碼範例) -->
+    <section id="tab-defense" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+          <span class="w-2 h-6 bg-emerald-600 rounded-full inline-block"></span>
+          安全編碼規範：如何正確使用 Prepared Statements
+        </h2>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          要完全防禦 SQL Injection，最有效的方法就是使用**參數化查詢 (Prepared Statements / Parameterized Queries)**。資料庫直譯器會先把 SQL 的語法結構編譯完畢，之後傳入的變數永遠只會被當成純字串（或資料值）處理，不會被直譯為指令。
+        </p>
+
+        <!-- 程式語言切換按鈕 -->
+        <div class="flex space-x-2 border-b border-slate-200">
+          <button onclick="setDefenseTab('python')" id="dtab-python" class="pb-2 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600">Python (sqlite3 / psycopg2)</button>
+          <button onclick="setDefenseTab('node')" id="dtab-node" class="pb-2 text-sm font-bold text-slate-500 hover:text-slate-800">Node.js (mysql2)</button>
+          <button onclick="setDefenseTab('php')" id="dtab-php" class="pb-2 text-sm font-bold text-slate-500 hover:text-slate-800">PHP (PDO)</button>
+          <button onclick="setDefenseTab('java')" id="dtab-java" class="pb-2 text-sm font-bold text-slate-500 hover:text-slate-800">Java (JDBC)</button>
         </div>
 
-
-        <div
-          class="mt-3 p-3 bg-slate-50
-                 border border-slate-200
-                 rounded-lg text-xs
-                 text-slate-700">
-
-          <strong class="text-indigo-700">
-            💡 解析：
-          </strong>
-
-          ${escapeHtml(
-            question.explanation
-          )}
-
+        <!-- CODE SNIPPETS -->
+        <div id="dcode-python" class="space-y-4 text-xs">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 bg-red-50 border border-red-200 rounded-xl space-y-2">
+              <div class="font-bold text-red-900 text-sm">❌ 危險寫法 (不安全的字串拼接)</div>
+              <pre class="bg-red-950 text-red-200 p-3 rounded-lg font-mono overflow-x-auto"># 絕不可以這樣寫！字串拼接會導致 SQLi
+cursor.execute(
+    f"SELECT * FROM users WHERE name = '{user_input}'"
+)</pre>
+            </div>
+            <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
+              <div class="font-bold text-emerald-900 text-sm">✅ 安全寫法 (參數化查詢)</div>
+              <pre class="bg-emerald-950 text-emerald-200 p-3 rounded-lg font-mono overflow-x-auto"># 安全！使用 ? 佔位符並以 Tuple 傳入變數
+cursor.execute(
+    "SELECT * FROM users WHERE name = ?", 
+    (user_input,)
+)</pre>
+            </div>
+          </div>
         </div>
 
-      `;
+        <div id="dcode-node" class="hidden space-y-4 text-xs">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 bg-red-50 border border-red-200 rounded-xl space-y-2">
+              <div class="font-bold text-red-900 text-sm">❌ 危險寫法</div>
+              <pre class="bg-red-950 text-red-200 p-3 rounded-lg font-mono overflow-x-auto">const sql = `SELECT * FROM users WHERE name = '${userInput}'`;
+db.query(sql);</pre>
+            </div>
+            <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
+              <div class="font-bold text-emerald-900 text-sm">✅ 安全寫法 (mysql2)</div>
+              <pre class="bg-emerald-950 text-emerald-200 p-3 rounded-lg font-mono overflow-x-auto">const sql = 'SELECT * FROM users WHERE name = ?';
+db.execute(sql, [userInput]);</pre>
+            </div>
+          </div>
+        </div>
 
+        <div id="dcode-php" class="hidden space-y-4 text-xs">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 bg-red-50 border border-red-200 rounded-xl space-y-2">
+              <div class="font-bold text-red-900 text-sm">❌ 危險寫法</div>
+              <pre class="bg-red-950 text-red-200 p-3 rounded-lg font-mono overflow-x-auto">$sql = "SELECT * FROM users WHERE name = '" . $_GET['name'] . "'";
+$pdo->query($sql);</pre>
+            </div>
+            <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
+              <div class="font-bold text-emerald-900 text-sm">✅ 安全寫法 (PHP PDO)</div>
+              <pre class="bg-emerald-950 text-emerald-200 p-3 rounded-lg font-mono overflow-x-auto">$stmt = $pdo->prepare('SELECT * FROM users WHERE name = :name');
+$stmt->execute(['name' => $userInput]);</pre>
+            </div>
+          </div>
+        </div>
 
-      container.appendChild(card);
+        <div id="dcode-java" class="hidden space-y-4 text-xs">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 bg-red-50 border border-red-200 rounded-xl space-y-2">
+              <div class="font-bold text-red-900 text-sm">❌ 危險寫法</div>
+              <pre class="bg-red-950 text-red-200 p-3 rounded-lg font-mono overflow-x-auto">String sql = "SELECT * FROM users WHERE name = '" + input + "'";
+Statement stmt = connection.createStatement();
+stmt.executeQuery(sql);</pre>
+            </div>
+            <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
+              <div class="font-bold text-emerald-900 text-sm">✅ 安全寫法 (PreparedStatement)</div>
+              <pre class="bg-emerald-950 text-emerald-200 p-3 rounded-lg font-mono overflow-x-auto">String sql = "SELECT * FROM users WHERE name = ?";
+PreparedStatement pstmt = connection.prepareStatement(sql);
+pstmt.setString(1, input);
+ResultSet rs = pstmt.executeQuery();</pre>
+            </div>
+          </div>
+        </div>
 
+        <!-- 特別提醒：ORDER BY 白名單 -->
+        <div class="p-4 bg-indigo-50 border border-indigo-200 rounded-xl space-y-1.5 text-xs text-indigo-950">
+          <div class="font-bold text-indigo-900 text-sm">💡 特別陷阱：動態排序 ORDER BY 的防禦方式</div>
+          <p class="leading-relaxed">
+            <code>ORDER BY</code> 的欄位名稱與排序方向（<code>ASC/DESC</code>）<strong>無法進行 SQL 參數化綁定</strong>。針對此類情況，絕對不可使用字串拼接，請務必採用<strong>後端白名單校驗 (Strict Whitelisting)</strong>：
+          </p>
+          <pre class="bg-indigo-950 text-indigo-200 p-3 rounded-lg font-mono overflow-x-auto mt-2">allowed_columns = ["id", "username", "created_at"]
+sort_column = input_col if input_col in allowed_columns else "id"
+query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校驗，安全！</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: QUIZ (隨堂測驗) -->
+    <section id="tab-quiz" class="hidden space-y-6">
+      <!-- 登入與身份設定卡片 -->
+      <div id="quiz-auth-card" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 max-w-xl mx-auto space-y-4">
+        <h2 class="text-lg font-bold text-slate-900 text-center">📝 SQL Injection 觀念評量測驗</h2>
+        <p class="text-xs text-slate-500 text-center">請輸入個人基本資料以開始測驗（系統將隨機自題庫抽取 10 題）</p>
+
+        <form onsubmit="startQuiz(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">班級</label>
+            <input type="text" id="user-class" required placeholder="例如：資科三甲" class="w-full p-2 border border-slate-300 rounded-lg">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">座號</label>
+            <input type="text" id="user-seat" required placeholder="例如：08" class="w-full p-2 border border-slate-300 rounded-lg">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">姓名</label>
+            <input type="text" id="user-name" required placeholder="例如：王小明" class="w-full p-2 border border-slate-300 rounded-lg">
+          </div>
+          <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition shadow-md">開始測驗</button>
+        </form>
+      </div>
+
+      <!-- 測驗題目容器 -->
+      <div id="quiz-window" class="hidden space-y-6 max-w-3xl mx-auto">
+        <div class="bg-indigo-900 text-white p-4 rounded-xl flex justify-between items-center text-xs">
+          <div>
+            考生：<span id="quiz-display-user" class="font-bold text-amber-300"></span>
+          </div>
+          <div>
+            題目數量：<span class="font-bold">10 題 (每題 10 分)</span>
+          </div>
+        </div>
+
+        <div id="quiz-questions-container" class="space-y-4">
+          <!-- 動態渲染 10 題 -->
+        </div>
+
+        <button onclick="submitQuiz()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-lg transition">提交測驗答案</button>
+      </div>
+
+      <!-- 測驗結果卡片 -->
+      <div id="quiz-result-card" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-200 max-w-xl mx-auto text-center space-y-4">
+        <div class="text-4xl">🎉</div>
+        <h3 class="text-xl font-bold text-slate-900">測驗已完成！</h3>
+        <p class="text-xs text-slate-500" id="result-user-info"></p>
+        
+        <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+          <div class="text-xs text-slate-500 uppercase tracking-widest font-semibold mb-1">您的得分</div>
+          <div id="result-score" class="text-5xl font-black text-indigo-600">0</div>
+          <div class="text-xs text-slate-400 mt-2">答對題數：<span id="result-count">0</span> / 10</div>
+        </div>
+
+        <button onclick="retakeQuiz()" class="px-6 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-lg transition">重新測驗</button>
+      </div>
+    </section>
+
+    <!-- TAB 5: SOLUTIONS (解答控制區 - 教師開關) -->
+    <section id="tab-solutions" class="hidden space-y-6">
+      <div class="bg-slate-900 text-white rounded-2xl p-6 shadow-sm border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold">🔐 教師控制台 (解答與解析管理)</h2>
+            <p class="text-xs text-slate-400">輸入教師管理密碼以切換是否發布隨堂測驗的標準答案與詳細解析。</p>
+          </div>
+          <div class="flex items-center space-x-3">
+            <span id="switch-status-label" class="text-xs font-bold text-amber-400">目前狀態：未公佈</span>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="teacher-publish-toggle" onchange="togglePublishAnswers()" class="sr-only peer">
+              <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 解答內容區 -->
+      <div id="solutions-locked-msg" class="bg-white rounded-2xl p-12 text-center text-slate-400 space-y-3 border border-slate-200">
+        <div class="text-4xl">🔒</div>
+        <div class="text-sm font-bold text-slate-700">解答區尚未開啟</div>
+        <p class="text-xs">請由授課教師於上方控制台解鎖後，方可存取全數 18 題庫之標準答案與詳細解析。</p>
+      </div>
+
+      <div id="solutions-unlocked-content" class="hidden space-y-4">
+        <!-- JS 會渲染 18 題完整解答與解析 -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 space-y-1">
+      <p>SQL Injection 互動教學平台 · 教學展示專用</p>
+      <p class="text-[10px] text-slate-400">請勿將本實驗室學習之注入技術用於未授權之真實目標。</p>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // --- GLOBAL CONSTANTS & CONFIG ---
+    const TEACHER_PASSWORD = "admin"; // 教師管理密碼
+    let isAnswersPublished = false;
+    let currentQuizUser = { cls: '', seat: '', name: '' };
+    let activeQuizQuestions = [];
+
+    // --- 各情境專屬 Payload 資料庫 ---
+    const scenarioPayloads = {
+      login: [
+        { label: "OR 萬用語法", value: "' OR '1'='1" },
+        { label: "管理者註解", value: "admin'--" },
+        { label: "數字型 1=1", value: "' OR 1=1--" }
+      ],
+      union: [
+        { label: "UNION 竊取密碼", value: "' UNION SELECT id, username FROM users--" },
+        { label: "測試欄位數 (3)", value: "' UNION SELECT 1, 2, 3--" },
+        { label: "獲取系統版本", value: "' UNION SELECT 1, @@version--" }
+      ],
+      blind: [
+        { label: "長度爆破 (True)", value: "' AND LENGTH(database()) = 4--" },
+        { label: "首字猜測 (True)", value: "' AND SUBSTRING(username,1,1)='a'--" },
+        { label: "條件觸發 (False)", value: "' AND 1=2--" }
+      ],
+      sleep: [
+        { label: "延遲 3 秒", value: "' AND SLEEP(3)--" },
+        { label: "條件式延遲", value: "' AND IF(1=1, SLEEP(3), 0)--" }
+      ],
+      orderby: [
+        { label: "合法欄位: username", value: "username" },
+        { label: "合法欄位: role", value: "role" },
+        { label: "注入盲注語法", value: "IF(1=1, id, username)" }
+      ],
+      waf: [
+        { label: "標準 OR (將被攔截)", value: "' OR '1'='1" },
+        { label: "大小寫混淆 (繞過)", value: "' oR '1'='1" },
+        { label: "註解分隔符 (繞過)", value: "'/**/OR/**/'1'='1" }
+      ]
+    };
+
+    // --- QUESTION BANK (完整 18 題) ---
+    const questionBank = [
+      {
+        id: 1,
+        question: "SQL Injection 漏洞產生的最根本原因為何？",
+        options: [
+          "資料庫軟體版本過舊",
+          "程式碼將使用者輸入的資料直接拼接為 SQL 指令，導致資料與指令混淆",
+          "Web 伺服器沒有安裝防火牆 (WAF)",
+          "資料庫密碼設定太過簡單"
+        ],
+        answer: 1,
+        explanation: "SQLi 的根本成因是程式將資料與指令混淆，動態字串拼接讓傳入的資料被資料庫直譯器誤認為新的 SQL 指令結構。"
+      },
+      {
+        id: 2,
+        question: "預編譯參數化查詢 (Prepared Statements) 為何能完全防範 SQL Injection？",
+        options: [
+          "因為它會自動把輸入的所有 SQL 關鍵字刪除",
+          "因為資料庫會先編譯 SQL 語法結構，傳入的參數僅被當成單純資料處理，不會被直譯為指令",
+          "因為它會對資料庫中的所有資料進行加密",
+          "因為它會自動限制使用者輸入的長度"
+        ],
+        answer: 1,
+        explanation: "Prepared Statements 會先 compile SQL 結構，變數傳入時無論包含何種單引號或關鍵字，都僅作為純字串處理。"
+      },
+      {
+        id: 3,
+        question: "在登入頁面輸入預設 Payload: ' OR '1'='1 時，其攻擊原理是什麼？",
+        options: [
+          "透過強迫 WHERE 查詢條件恆為 True，繞過密碼比對邏輯",
+          "直接將資料庫關機",
+          "將管理者密碼重置為 1",
+          "利用 SQL 語法觸發資料庫溢位錯誤"
+        ],
+        answer: 0,
+        explanation: "' OR '1'='1 建立了恆真的布林邏輯，使資料庫忽略後續的密碼比對並回傳第一筆資料（通常為管理員）。"
+      },
+      {
+        id: 4,
+        question: "下列何者為 UNION-based SQL Injection 成功執行的前提條件？",
+        options: [
+          "前後兩個 SELECT 查詢語句必須擁有相同數量的欄位，且對應位置的資料型態相容",
+          "目標資料庫必須是 MySQL",
+          "使用者必須擁有資料庫管理員 (root/sa) 權限",
+          "資料庫必須支援多執行緒處理"
+        ],
+        answer: 0,
+        explanation: "UNION 運算子要求前後兩組 SELECT 的欄位數目必須完全一致，且資料型態需相容。"
+      },
+      {
+        id: 5,
+        question: "當系統不回傳任何資料庫錯誤訊息，畫面也沒有資料變化時，可利用何種技術進行盲注？",
+        options: [
+          "時間延遲型盲注 (Time-Based Blind SQLi，如使用 SLEEP() 函數)",
+          "XSS 跨站腳本攻擊",
+          "CSRF 跨站請求偽造",
+          "DDOS 阻斷服務攻擊"
+        ],
+        answer: 0,
+        explanation: "當無任何可見視覺回應時，攻擊者可透過 SLEEP() 等函數強迫資料庫延遲回應，透過 HTTP 響應時間推算資訊。"
+      },
+      {
+        id: 6,
+        question: "針對 ORDER BY 語句（如動態排序欄位），為什麼無法直接使用傳統的 Prepared Statements 綁定參數？",
+        options: [
+          "因為 ORDER BY 後方需要的是「欄位名稱」或識別子，而非字串或數字純值",
+          "因為 ORDER BY 語法屬於 HTML 層級",
+          "因為 ORDER BY 不支援任何 SQL 語法",
+          "因為 ORDER BY 只能接受數字"
+        ],
+        answer: 0,
+        explanation: "Prepared Statements 僅能將參數綁定為 Value (資料值)，不能綁定 Table/Column 名稱，否則會被自動加上引號變成字串導致語法錯誤。"
+      },
+      {
+        id: 7,
+        question: "針對 ORDER BY 動態排序欄位的 SQL Injection 漏洞，最佳的安全防禦措施為何？",
+        options: [
+          "使用嚴格的後端白名單 (Whitelisting) 校驗，僅允許預先定義好的合法欄位名稱",
+          "使用 base64 對輸入進行編碼",
+          "將 ORDER BY 改為 GROUP BY",
+          "對輸入值進行 HTML Entity 轉義"
+        ],
+        answer: 0,
+        explanation: "因為 ORDER BY 無法直接參數化，故最佳實踐是採用白名單清單比對輸入是否合法。"
+      },
+      {
+        id: 8,
+        question: "在 SQL 語法中，代表單行註解（將後續 SQL 指令忽略）的常見符號為何？",
+        options: [
+          "-- (雙減號) 或 #",
+          "//",
+          "<!-- -->",
+          "/* */"
+        ],
+        answer: 0,
+        explanation: "在 ANSI SQL 中 `-- ` 為標準單行註解，MySQL 中 `#` 亦代表單行註解。"
+      },
+      {
+        id: 9,
+        question: "有些 WAF 會透過黑名單過濾小寫的 \"or\" 關鍵字，攻擊者常使用何種技巧嘗試繞過？",
+        options: [
+          "大小寫混淆（如 oR、Or）或插入 SQL 註解分隔符（如 /**/）",
+          "將網址改為 HTTPS",
+          "使用更快的網路速度連線",
+          "重複送出相同的封包 100 次"
+        ],
+        answer: 0,
+        explanation: "簡易黑名單常因未考量大小寫變體（oR）或註解分隔（/**/）而遭輕易繞過。"
+      },
+      {
+        id: 10,
+        question: "布林型盲注 (Boolean-Based Blind) 主要依賴什麼資訊來逐步猜測資料庫內容？",
+        options: [
+          "應用程式回傳的布林狀態（True/False，例如頁面顯示正常與否或 HTTP 狀態碼）",
+          "伺服器噴出的詳細 Stack Trace 錯誤日誌",
+          "資料庫管理員的帳號密碼提示",
+          "伺服器的 CPU 使用率高低"
+        ],
+        answer: 0,
+        explanation: "布林盲注藉由觀察構造的邏輯條件（True 或 False）所引發的頁面不同反應來逐字爆破資料。"
+      },
+      {
+        id: 11,
+        question: "下列何者「不是」防禦 SQL Injection 的有效手段？",
+        options: [
+          "僅在前端 JavaScript 進行簡單的字串長度與單引號檢查",
+          "使用 Prepared Statements 參數化查詢",
+          "使用 ORM (Object-Relational Mapping) 框架並遵循安全規範",
+          "對 ORDER BY 採用後端嚴格白名單檢驗"
+        ],
+        answer: 0,
+        explanation: "前端驗證可被攻擊者輕易透過 Postman、Burp Suite 或 Curl 繞過，防禦必須在後端實作。"
+      },
+      {
+        id: 12,
+        question: "在 SQLi 攻擊中，`INFORMATION_SCHEMA` 資料庫的作用為何？",
+        options: [
+          "它是 ANSI SQL 標準中儲存資料庫中所有 Table 名稱、Column 名稱等 Meta-data 的系統資料表",
+          "它是用來儲存網站伺服器日誌的檔案",
+          "它是用來加密使用者密碼的演算法",
+          "它是用於防止 SQLi 的安全性模組"
+        ],
+        answer: 0,
+        explanation: "攻擊者在 UNION SQLi 中常查詢 `INFORMATION_SCHEMA.TABLES` 與 `COLUMNS` 來探查整個資料庫的架構。"
+      },
+      {
+        id: 13,
+        question: "使用 ORM 框架（例如 Entity Framework, Sequelize, Django ORM）是否就「絕對不會」發生 SQLi？",
+        options: [
+          "否，若在 ORM 中使用了原生的Raw Query (如 `.raw()` 或 `.extra()`) 並拼接字串，依然會產生 SQLi",
+          "是，只要使用 ORM 就不可能出現任何 SQLi 漏洞",
+          "是，因為 ORM 會自動關閉資料庫的連線",
+          "否，因為 ORM 只支援 NoSQL 資料庫"
+        ],
+        answer: 0,
+        explanation: "許多 ORM 允許開發者編寫 Raw SQL，若在此處誤用動態拼接字串，依然會導致嚴重漏洞。"
+      },
+      {
+        id: 14,
+        question: "在二次注入 (Second-Order SQL Injection) 中，惡意 Payload 是如何被觸發的？",
+        options: [
+          "Payload 首次被安全地儲存至資料庫中，但在後續被其他程式邏輯取出並進行二次 SQL 拼接時被執行",
+          "攻擊者連續發送兩次相同的 HTTP 請求",
+          "攻擊者同時利用 SQLi 與 XSS 兩種漏洞",
+          "資料庫連續發生兩次崩潰"
+        ],
+        answer: 0,
+        explanation: "二次注入是指輸入存入資料庫時未觸發漏洞，但在後續流程被取出作為另一條動態 SQL 拼接的變數時才爆發。"
+      },
+      {
+        id: 15,
+        question: "關於最小權限原則 (Principle of Least Privilege)，下列何者正確？",
+        options: [
+          "Web 應用程式連接資料庫時，不應使用 root/sa 等高權限帳號，以降低 SQLi 爆發時的損害",
+          "資料庫密碼長度不應超過 8 個字元",
+          "限制使用者每天只能登入 3 次",
+          "不允許使用者更換密碼"
+        ],
+        answer: 0,
+        explanation: "落實最小權限原則能降低風險，即使發生 SQLi，攻擊者也無法執行 `DROP DATABASE` 或讀取系統敏感檔案。"
+      },
+      {
+        id: 16,
+        question: "下列何者是 PHP 中防止 SQL Injection 的安全 PDO 寫法？",
+        options: [
+          "$stmt =$pdo->prepare('SELECT * FROM users WHERE name = :name'); $stmt->execute(['name' =>$name]);",
+          "$pdo->query(\"SELECT * FROM users WHERE name = '$name'\");",
+          "$pdo->exec(\"SELECT * FROM users WHERE name = \" . $_GET['name']);",
+          "eval(\"SELECT * FROM users WHERE name = $name\");"
+        ],
+        answer: 0,
+        explanation: "使用 `$pdo->prepare()` 與具名綁定 `:name` 並搭配 `execute()` 才是正確的參數化防禦方式。"
+      },
+      {
+        id: 17,
+        question: "在 Python sqlite3 中，下列哪一種寫法才是正確且安全的參數化查詢？",
+        options: [
+          "cursor.execute(\"SELECT * FROM users WHERE name = ?\", (name,))",
+          "cursor.execute(\"SELECT * FROM users WHERE name = '\" + name + \"'\")",
+          "cursor.execute(f\"SELECT * FROM users WHERE name = '{name}'\")",
+          "cursor.execute(\"SELECT * FROM users WHERE name = %s\" % name)"
+        ],
+        answer: 0,
+        explanation: "使用佔位符 `?` 並將變數以 Tuple `(name,)` 傳入，才能發揮參數化查詢的預編譯效果；其餘三種皆屬於危險的動態字串拼接。"
+      },
+      {
+        id: 18,
+        question: "Web 應用程式防火牆 (WAF) 能否完全取代程式碼層級的參數化查詢 (Prepared Statements)？",
+        options: [
+          "不能，WAF 僅能作為縱深防禦層，攻擊者常可透過編碼或混淆繞過 WAF 規則",
+          "能，WAF 可以百分之百攔截所有類型的 SQL Injection",
+          "能，只要安裝 WAF 後端程式即可隨意拼接 SQL",
+          "不能，因為 WAF 只支援防範 XSS 攻擊"
+        ],
+        answer: 0,
+        explanation: "WAF 屬於縱深防禦的一環，無法保證 100% 攔截；修復程式碼層級的漏洞（如使用 Prepared Statements）才是徹底根治 SQLi 的根本解決方案。"
+      }
+    ];
+
+    // --- MOCK DB DATA ---
+    const mockDBUsers = [
+      { id: 1, username: 'admin', role: 'Administrator (Hash: $2a$12$e8...)' },
+      { id: 2, username: 'alice', role: 'User (Hash: $2a$12$k9...)' },
+      { id: 3, username: 'bob', role: 'User (Hash: $2a$12$p3...)' }
+    ];
+
+    let sandboxState = {
+      mode: 'vulnerable', // 'vulnerable' | 'secure'
+      sleepTimer: null
+    };
+
+    // --- NAVIGATION SYSTEM ---
+    function switchTab(tabId) {
+      const tabs = ['learn', 'sandbox', 'defense', 'quiz', 'solutions'];
+      tabs.forEach(t => {
+        const section = document.getElementById(`tab-${t}`);
+        const navBtn = document.getElementById(`nav-${t}`);
+        if (section) section.classList.add('hidden');
+        if (navBtn) {
+          navBtn.classList.remove('text-indigo-600', 'bg-indigo-50', 'font-semibold');
+          navBtn.classList.add('text-slate-600');
+        }
+      });
+
+      const activeSection = document.getElementById(`tab-${tabId}`);
+      const activeNavBtn = document.getElementById(`nav-${tabId}`);
+      if (activeSection) activeSection.classList.remove('hidden');
+      if (activeNavBtn) {
+        activeNavBtn.classList.add('text-indigo-600', 'bg-indigo-50', 'font-semibold');
+        activeNavBtn.classList.remove('text-slate-600');
+      }
+
+      if (tabId === 'sandbox') {
+        updatePayloadButtons();
+        runSandbox();
+      }
     }
-  );
 
-}
+    // --- SANDBOX SYSTEM ---
+    function setSandboxMode(mode) {
+      sandboxState.mode = mode;
+      const btnVuln = document.getElementById('mode-vuln');
+      const btnSafe = document.getElementById('mode-safe');
 
+      if (mode === 'vulnerable') {
+        btnVuln.className = "px-3 py-1 text-xs font-bold rounded-md bg-white text-red-600 shadow-sm transition";
+        btnSafe.className = "px-3 py-1 text-xs font-bold rounded-md text-slate-600 hover:text-slate-900 transition";
+      } else {
+        btnSafe.className = "px-3 py-1 text-xs font-bold rounded-md bg-white text-emerald-600 shadow-sm transition";
+        btnVuln.className = "px-3 py-1 text-xs font-bold rounded-md text-slate-600 hover:text-slate-900 transition";
+      }
+      runSandbox();
+    }
 
-/* =========================================================
-   INITIALIZATION
-========================================================= */
+    // 動態更新 Payload 按鈕 (與選擇情境連動)
+    function updatePayloadButtons() {
+      const scenario = document.getElementById('sb-scenario').value;
+      const container = document.getElementById('sb-payload-container');
+      const payloads = scenarioPayloads[scenario] || [];
 
-window.addEventListener(
-  "DOMContentLoaded",
-  function () {
+      container.innerHTML = '';
 
-    updatePayloadButtons();
+      payloads.forEach((item, index) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'px-2 py-0.5 text-[11px] bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 rounded font-mono border border-slate-200 transition-colors';
+        btn.textContent = item.label;
+        btn.onclick = () => setPayload(item.value);
+        container.appendChild(btn);
 
-    runSandbox();
+        // 預設填入第一個範例 Payload
+        if (index === 0) {
+          document.getElementById('sb-input').value = item.value;
+        }
+      });
+    }
 
-  }
-);
+    function setPayload(str) {
+      document.getElementById('sb-input').value = str;
+      runSandbox();
+    }
 
-</script>
+    function runSandbox() {
+      if (sandboxState.sleepTimer) {
+        clearInterval(sandboxState.sleepTimer);
+        sandboxState.sleepTimer = null;
+      }
+      document.getElementById('sleep-timer-bar').classList.add('hidden');
 
+      const scenario = document.getElementById('sb-scenario').value;
+      const input = document.getElementById('sb-input').value;
+      const isVuln = sandboxState.mode === 'vulnerable';
+
+      let fullSQL = '';
+      let rows = [];
+      let statusText = '狀態：正常執行';
+      let statusClass = 'bg-emerald-100 text-emerald-800';
+      let logMsg = 'DB Log: 查詢成功回傳。';
+      let analysisText = '';
+
+      switch (scenario) {
+        case 'login':
+          if (isVuln) {
+            fullSQL = `SELECT * FROM users WHERE username = '${input}' AND password = 'xxx'`;
+            if (input.includes("' OR '1'='1") || input.includes("admin'--") || input.includes("' OR 1=1")) {
+              rows = [...mockDBUsers];
+              statusText = '⚠️ 繞過成功！(Extracted All Users)';
+              statusClass = 'bg-red-100 text-red-800';
+              logMsg = 'DB Log: WHERE 條件恆真，驗證邏輯遭繞過！';
+              analysisText = '<strong>漏洞分析：</strong> 動態拼接讓單引號閉合了字串，並插入 <code>OR \'1\'=\'1\'</code>，導致資料庫判定條件成立並回傳所有使用者。';
+            } else {
+              rows = mockDBUsers.filter(u => u.username === input);
+              analysisText = '<strong>一般查詢：</strong> 未觸發注入，依傳入字串精確比對。';
+            }
+          } else {
+            fullSQL = `PREPARE stmt FROM 'SELECT * FROM users WHERE username = ? AND password = ?';\nEXECUTE stmt USING "${input}", "xxx";`;
+            rows = mockDBUsers.filter(u => u.username === input);
+            statusClass = 'bg-emerald-100 text-emerald-800';
+            analysisText = '<strong>安全防禦：</strong> 預處理機制將整個 <code>' + escapeHTML(input) + '</code> 當成純字串，引號被自動轉義，無法改寫 SQL 結構。';
+          }
+          break;
+
+        case 'union':
+          if (isVuln) {
+            fullSQL = `SELECT id, title FROM articles WHERE id = 1 UNION SELECT id, username FROM users WHERE '${input}' = ''`;
+            if (input.toLowerCase().includes('union select')) {
+              fullSQL = `SELECT id, title FROM articles WHERE id = -1 ${input}`;
+              rows = [
+                { id: 1, username: 'admin', role: 'Hash: $2a$12$e8... [EXFILTRATED]' },
+                { id: 2, username: 'alice', role: 'Hash: $2a$12$k9... [EXFILTRATED]' }
+              ];
+              statusText = '⚠️ UNION 竊取資料成功！';
+              statusClass = 'bg-red-100 text-red-800';
+              logMsg = 'DB Log: UNION SELECT 成功跨表附加了 users 資料表！';
+              analysisText = '<strong>漏洞分析：</strong> 攻擊者透過 UNION 追加查詢，直接提取跨資料表的敏感資訊。';
+            } else {
+              rows = [{ id: 1, username: 'Article Title', role: 'Article Content' }];
+              analysisText = '請試著點選上方的 Payload 或輸入：<code>\' UNION SELECT id, username FROM users--</code>';
+            }
+          } else {
+            fullSQL = `PREPARE stmt FROM 'SELECT id, title FROM articles WHERE id = ?';\nEXECUTE stmt USING "${input}";`;
+            rows = [];
+            statusClass = 'bg-emerald-100 text-emerald-800';
+            analysisText = '<strong>安全防禦：</strong> 輸入被強制轉義或認定為參數，UNION 指令不被當作 SQL 語義執行。';
+          }
+          break;
+
+        case 'blind':
+          if (isVuln) {
+            fullSQL = `SELECT * FROM users WHERE id = 1 AND '${input}' = ''`;
+            if (input.includes("AND") || input.includes("'")) {
+              fullSQL = `SELECT * FROM users WHERE id = 1 ${input}`;
+              rows = [mockDBUsers[0]];
+              statusText = '回應：HTTP 200 OK (True)';
+              statusClass = 'bg-amber-100 text-amber-800';
+              logMsg = 'DB Response: True (回傳頁面正常，洩漏布林狀態)';
+              analysisText = '<strong>布林盲注：</strong> 雖然沒直接回傳敏感資料，但頁面狀況（True/False）暴露了子查詢條件的真偽。';
+            } else {
+              rows = [mockDBUsers[0]];
+              analysisText = '一般查詢中...';
+            }
+          } else {
+            fullSQL = `PREPARE stmt FROM 'SELECT * FROM users WHERE id = ?';\nEXECUTE stmt USING "${input}";`;
+            rows = [];
+            analysisText = '<strong>安全防禦：</strong> 參數化防禦切斷了布林邏輯拼貼的可能。';
+          }
+          break;
+
+        case 'sleep':
+          fullSQL = isVuln 
+            ? `SELECT * FROM users WHERE username = 'admin' ${input}`
+            : `PREPARE stmt FROM 'SELECT * FROM users WHERE username = ?';\nEXECUTE stmt USING "${input}";`;
+          
+          if (isVuln && input.toUpperCase().includes('SLEEP')) {
+            triggerSleepAnimation();
+            statusText = '⏱️ 時間盲注觸發 (Sleeping...)';
+            statusClass = 'bg-amber-100 text-amber-800';
+            logMsg = 'DB Log: 執行 SLEEP(3) 函數，回應延遲 3.00 秒！';
+            analysisText = '<strong>時間盲注：</strong> 攻擊者透過引起資料庫執行延遲函數（如 <code>SLEEP(3)</code>），觀察 HTTP 響應時間推算密碼或字串。';
+          } else {
+            rows = [mockDBUsers[0]];
+            analysisText = isVuln ? '試著輸入包含 <code>\' AND SLEEP(3)--</code> 的 Payload' : '<strong>安全防禦：</strong> 參數化查詢不執行文字中的 SLEEP 函數。';
+          }
+          break;
+
+        case 'orderby':
+          if (isVuln) {
+            fullSQL = `SELECT id, username, role FROM users ORDER BY ${input}`;
+            rows = [...mockDBUsers];
+            statusText = '⚠️ 警示：ORDER BY 直接動態拼接';
+            statusClass = 'bg-red-100 text-red-800';
+            logMsg = 'DB Log: 執行動態排序指令。';
+            analysisText = '<strong>陷阱警示：</strong> Prepared Statements 無法綁定 ORDER BY 欄位名稱。若直接拼接字串，攻擊者可帶入條件式盲注！';
+          } else {
+            const allowed = ['id', 'username', 'role'];
+            const cleanInput = allowed.includes(input.trim()) ? input.trim() : 'id';
+            fullSQL = `// 後端白名單驗證: const allowed = ['id','username','role'];\nSELECT id, username, role FROM users ORDER BY ${cleanInput}`;
+            rows = [...mockDBUsers];
+            statusText = '✅ 白名單過濾成功';
+            statusClass = 'bg-emerald-100 text-emerald-800';
+            logMsg = `DB Log: 安全通過白名單校驗 (採用欄位: ${cleanInput})`;
+            analysisText = '<strong>白名單防禦：</strong> 後端檢查傳入字串是否合法列於 allowed 清單中，否則降級至預設欄位 <code>id</code>。';
+          }
+          break;
+
+        case 'waf':
+          if (isVuln) {
+            fullSQL = `// 簡單黑名單 WAF (過濾 "OR " 小寫與空格)\nSELECT * FROM users WHERE username = '${input}'`;
+            const hasBlocked = input.includes("OR ") || input.includes("or ");
+            if (hasBlocked) {
+              statusText = '🛑 被 WAF 攔截 (403 Forbidden)';
+              statusClass = 'bg-red-100 text-red-800';
+              logMsg = 'WAF Alert: 檢測到黑名單關鍵字 OR！';
+              analysisText = '<strong>黑名單攔截：</strong> 簡單規則發揮了效果，但極易被繞過。';
+            } else if (input.includes("oR") || input.includes("Or") || input.includes("/**/")) {
+              rows = [...mockDBUsers];
+              statusText = '⚠️ WAF 遭到成功繞過 (Bypassed!)';
+              statusClass = 'bg-amber-100 text-amber-800';
+              logMsg = 'DB Log: 成功繞過 WAF 檢測並執行注入！';
+              analysisText = '<strong>WAF 繞過：</strong> 攻擊者使用大小寫混淆（如 <code>oR</code>）或註解分隔（<code>/**/</code>）成功偷渡黑名單！證明單靠 WAF 不安全。';
+            } else {
+              rows = mockDBUsers.filter(u => u.username === input);
+              analysisText = '請試著使用大小寫混淆（例如 <code>\' oR \'1\'=\'1</code>）嘗試繞過 WAF。';
+            }
+          } else {
+            fullSQL = `PREPARE stmt FROM 'SELECT * FROM users WHERE username = ?';\nEXECUTE stmt USING "${input}";`;
+            rows = [];
+            analysisText = '<strong>根本解決之道：</strong> 程式碼層級的預編譯參數化查詢能 100% 免疫此類混淆繞過。';
+          }
+          break;
+      }
+
+      // Update UI
+      document.getElementById('sb-sql-display').textContent = fullSQL;
+      renderTokens(fullSQL);
+
+      const statusBadge = document.getElementById('sb-status-badge');
+      statusBadge.textContent = statusText;
+      statusBadge.className = `px-2.5 py-0.5 rounded-full text-xs font-bold ${statusClass}`;
+
+      document.getElementById('sb-output-log').textContent = logMsg;
+      document.getElementById('sb-analysis').innerHTML = analysisText;
+
+      const tbody = document.getElementById('sb-db-rows');
+      tbody.innerHTML = '';
+      document.getElementById('sb-row-count').textContent = `Row Count: ${rows.length}`;
+
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400 italic">（無回傳資料）</td></tr>`;
+      } else {
+        rows.forEach(r => {
+          const tr = document.createElement('tr');
+          tr.className = "hover:bg-slate-50";
+          tr.innerHTML = `
+            <td class="p-2 font-bold text-slate-700">${r.id}</td>
+            <td class="p-2 text-indigo-600">${escapeHTML(r.username)}</td>
+            <td class="p-2 text-slate-500">${escapeHTML(r.role || r.content || '')}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    }
+
+    function triggerSleepAnimation() {
+      const timerBar = document.getElementById('sleep-timer-bar');
+      const progress = document.getElementById('sleep-progress');
+      const countdown = document.getElementById('sleep-countdown');
+      
+      timerBar.classList.remove('hidden');
+      progress.style.width = '0%';
+      
+      let start = Date.now();
+      let duration = 3000;
+
+      sandboxState.sleepTimer = setInterval(() => {
+        let elapsed = Date.now() - start;
+        let remaining = Math.max(0, (duration - elapsed) / 1000);
+        let pct = Math.min(100, (elapsed / duration) * 100);
+
+        progress.style.width = `${pct}%`;
+        countdown.textContent = `${remaining.toFixed(1)}s`;
+
+        if (elapsed >= duration) {
+          clearInterval(sandboxState.sleepTimer);
+          countdown.textContent = "完成！";
+        }
+      }, 50);
+    }
+
+    function renderTokens(sqlStr) {
+      const display = document.getElementById('sb-tokens-display');
+      display.innerHTML = '';
+      
+      const tokens = sqlStr.split(/(\s+|'[^']*'|--|SELECT|FROM|WHERE|AND|OR|UNION|ORDER BY|PREPARE|EXECUTE)/gi).filter(Boolean);
+      
+      tokens.forEach(tok => {
+        if (!tok.trim()) return;
+        const span = document.createElement('span');
+        span.className = "px-2 py-0.5 rounded text-[11px] font-mono border ";
+        
+        const upper = tok.toUpperCase();
+        if (['SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'UNION', 'ORDER BY', 'PREPARE', 'EXECUTE'].includes(upper)) {
+          span.className += "bg-indigo-100 text-indigo-800 border-indigo-200 font-bold";
+        } else if (tok.startsWith("'") || tok.endsWith("'")) {
+          span.className += "bg-amber-100 text-amber-800 border-amber-200";
+        } else if (tok.includes('--')) {
+          span.className += "bg-slate-200 text-slate-600 border-slate-300 italic";
+        } else {
+          span.className += "bg-white text-slate-700 border-slate-200";
+        }
+        span.textContent = tok;
+        display.appendChild(span);
+      });
+    }
+
+    // --- DEFENSE CODE TABS ---
+    function setDefenseTab(lang) {
+      const langs = ['python', 'node', 'php', 'java'];
+      langs.forEach(l => {
+        document.getElementById(`dcode-${l}`).classList.add('hidden');
+        const btn = document.getElementById(`dtab-${l}`);
+        btn.className = "pb-2 text-sm font-bold text-slate-500 hover:text-slate-800";
+      });
+      document.getElementById(`dcode-${lang}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`dtab-${lang}`);
+      activeBtn.className = "pb-2 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600";
+    }
+
+    // --- QUIZ SYSTEM ---
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function startQuiz(e) {
+      e.preventDefault();
+      const cls = document.getElementById('user-class').value.trim();
+      const seat = document.getElementById('user-seat').value.trim();
+      const name = document.getElementById('user-name').value.trim();
+
+      if (!cls || !seat || !name) return;
+
+      currentQuizUser = { cls, seat, name };
+      document.getElementById('quiz-display-user').textContent = `${cls} / ${seat}號 / ${name}`;
+
+      // 隨機自 18 題庫中抽 10 題
+      activeQuizQuestions = shuffleArray(questionBank).slice(0, 10);
+
+      renderQuizQuestions();
+
+      document.getElementById('quiz-auth-card').classList.add('hidden');
+      document.getElementById('quiz-window').classList.remove('hidden');
+      document.getElementById('quiz-result-card').classList.add('hidden');
+    }
+
+    function renderQuizQuestions() {
+      const container = document.getElementById('quiz-questions-container');
+      container.innerHTML = '';
+
+      activeQuizQuestions.forEach((q, idx) => {
+        const card = document.createElement('div');
+        card.className = "bg-white border border-slate-200 rounded-xl p-5 space-y-3 shadow-sm";
+        
+        let optionsHTML = '';
+        q.options.forEach((opt, oIdx) => {
+          optionsHTML += `
+            <label class="flex items-start space-x-3 p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:border-indigo-300 transition">
+              <input type="radio" name="q_${q.id}" value="${oIdx}" class="mt-0.5 text-indigo-600 focus:ring-indigo-500">
+              <span class="text-xs text-slate-700 font-sans leading-snug">${escapeHTML(opt)}</span>
+            </label>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="font-bold text-slate-900 text-sm">
+            <span class="text-indigo-600 mr-1.5">Q${idx + 1}.</span> ${escapeHTML(q.question)}
+          </div>
+          <div class="space-y-2">
+            ${optionsHTML}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function submitQuiz() {
+      let score = 0;
+      let correctCount = 0;
+
+      activeQuizQuestions.forEach(q => {
+        const selected = document.querySelector(`input[name="q_${q.id}"]:checked`);
+        if (selected && parseInt(selected.value) === q.answer) {
+          correctCount++;
+        }
+      });
+
+      score = correctCount * 10;
+
+      document.getElementById('result-user-info').textContent = `${currentQuizUser.cls} - ${currentQuizUser.seat}號 - ${currentQuizUser.name}`;
+      document.getElementById('result-score').textContent = `${score} 分`;
+      document.getElementById('result-count').textContent = `${correctCount} / 10`;
+
+      document.getElementById('quiz-window').classList.add('hidden');
+      document.getElementById('quiz-result-card').classList.remove('hidden');
+    }
+
+    function retakeQuiz() {
+      document.getElementById('quiz-result-card').classList.add('hidden');
+      document.getElementById('quiz-auth-card').classList.remove('hidden');
+    }
+
+    // --- TEACHER CONTROL & SOLUTIONS ---
+    function togglePublishAnswers() {
+      const toggle = document.getElementById('teacher-publish-toggle');
+      const label = document.getElementById('switch-status-label');
+
+      if (toggle.checked) {
+        const pwd = prompt("請輸入教師管理密碼以公佈解答：");
+        if (pwd === TEACHER_PASSWORD) {
+          isAnswersPublished = true;
+          label.textContent = "目前狀態：已公佈解答";
+          label.className = "text-xs font-bold text-emerald-400";
+          renderUnlockedSolutions();
+        } else {
+          alert("密碼錯誤！無法解鎖解答區。");
+          toggle.checked = false;
+        }
+      } else {
+        isAnswersPublished = false;
+        label.textContent = "目前狀態：未公佈";
+        label.className = "text-xs font-bold text-amber-400";
+        document.getElementById('solutions-locked-msg').classList.remove('hidden');
+        document.getElementById('solutions-unlocked-content').classList.add('hidden');
+      }
+    }
+
+    function renderUnlockedSolutions() {
+      const lockedMsg = document.getElementById('solutions-locked-msg');
+      const container = document.getElementById('solutions-unlocked-content');
+      
+      lockedMsg.classList.add('hidden');
+      container.classList.remove('hidden');
+      container.innerHTML = '';
+
+      questionBank.forEach((q, i) => {
+        const item = document.createElement('div');
+        item.className = "border border-slate-200 rounded-xl p-5 bg-white space-y-2 text-xs shadow-sm";
+        
+        item.innerHTML = `
+          <div class="font-bold text-slate-900 text-sm">
+            <span class="text-indigo-600 mr-1">Q${i + 1}.</span> ${escapeHTML(q.question)}
+          </div>
+          <div class="bg-emerald-50 border border-emerald-200 text-emerald-900 p-2.5 rounded font-semibold">
+            ✅ 正確答案：${escapeHTML(q.options[q.answer])}
+          </div>
+          <div class="text-slate-600 leading-relaxed pt-1">
+            <span class="font-bold text-slate-700">解析：</span>${escapeHTML(q.explanation)}
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // 初始化頁面
+    document.addEventListener('DOMContentLoaded', () => {
+      updatePayloadButtons();
+    });
+  </script>
 </body>
 </html>
