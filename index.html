@@ -1099,12 +1099,13 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
 
     // --- TEACHER CONTROL & SOLUTIONS ---
     function togglePublishAnswers() {
+      const EACHER_PASSWOR =teacher123;
       const toggle = document.getElementById('teacher-publish-toggle');
       const label = document.getElementById('switch-status-label');
 
       if (toggle.checked) {
         const pwd = prompt("請輸入教師管理密碼以公佈解答：");
-        if (pwd == teacher123) {
+        if (pwd === TEACHER_PASSWORD) {
           isAnswersPublished = true;
           label.textContent = "目前狀態：已公佈解答";
           label.className = "text-xs font-bold text-emerald-400";
