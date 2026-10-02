@@ -18,24 +18,24 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
 
-  <!-- HEADER / NAVBAR -->
-  <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+  <!-- HEADER / NAVBAR (淺色系風格) -->
+  <header class="bg-white text-slate-800 border-b border-slate-200 shadow-sm sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center space-x-3">
         <div class="bg-red-600 p-2 rounded-lg font-bold text-white tracking-widest text-sm">SQLi</div>
         <div>
-          <h1 class="text-lg font-bold leading-tight">SQL Injection 互動式教學與防禦實驗室</h1>
-          <p class="text-xs text-slate-400">資安實務互動課程 · 漏洞剖析與參數化查詢防禦</p>
+          <h1 class="text-lg font-bold leading-tight text-slate-900">SQL Injection 互動式教學與防禦實驗室</h1>
+          <p class="text-xs text-slate-500">資安實務互動課程 · 漏洞剖析與參數化查詢防禦</p>
         </div>
       </div>
 
       <!-- MAIN NAVIGATION -->
-      <nav class="flex items-center space-x-1 bg-slate-800 p-1 rounded-xl text-xs md:text-sm">
-        <button onclick="switchTab('learn')" id="nav-learn" class="px-3 py-1.5 rounded-lg transition text-indigo-600 bg-indigo-50 font-semibold">1. 原理剖析</button>
-        <button onclick="switchTab('sandbox')" id="nav-sandbox" class="px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">2. 互動沙盒</button>
-        <button onclick="switchTab('defense')" id="nav-defense" class="px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">3. 防禦程式碼</button>
-        <button onclick="switchTab('quiz')" id="nav-quiz" class="px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">4. 隨堂測驗</button>
-        <button onclick="switchTab('solutions')" id="nav-solutions" class="px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">5. 解答控制</button>
+      <nav class="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl text-xs md:text-sm">
+        <button onclick="switchTab('learn')" id="nav-learn" class="px-3 py-1.5 rounded-lg transition text-indigo-600 bg-white font-semibold shadow-sm">1. 原理剖析</button>
+        <button onclick="switchTab('sandbox')" id="nav-sandbox" class="px-3 py-1.5 rounded-lg transition text-slate-600 hover:bg-slate-200/60 hover:text-slate-900">2. 互動沙盒</button>
+        <button onclick="switchTab('defense')" id="nav-defense" class="px-3 py-1.5 rounded-lg transition text-slate-600 hover:bg-slate-200/60 hover:text-slate-900">3. 防禦程式碼</button>
+        <button onclick="switchTab('quiz')" id="nav-quiz" class="px-3 py-1.5 rounded-lg transition text-slate-600 hover:bg-slate-200/60 hover:text-slate-900">4. 隨堂測驗</button>
+        <button onclick="switchTab('solutions')" id="nav-solutions" class="px-3 py-1.5 rounded-lg transition text-slate-600 hover:bg-slate-200/60 hover:text-slate-900">5. 解答控制</button>
       </nav>
     </div>
   </header>
@@ -144,11 +144,11 @@
             </select>
           </div>
 
-          <!-- 預設常用 Payload (動態連動選單) -->
+          <!-- 預設常用 Payload -->
           <div class="space-y-1.5">
             <label class="text-xs font-semibold text-slate-500">預設常用 Payload (點擊自動填入)：</label>
             <div id="sb-payload-container" class="flex flex-wrap gap-1.5">
-              <!-- 按鈕由 JavaScript 依情境動態生成 -->
+              <!-- 按鈕由 JS 生成 -->
             </div>
           </div>
 
@@ -180,7 +180,7 @@
             </div>
             <pre id="sb-sql-display" class="font-mono text-xs overflow-x-auto text-emerald-400 p-3 bg-slate-950 rounded-lg border border-slate-800 whitespace-pre-wrap break-all"></pre>
             
-            <!-- SQL Lexer / Token 視覺化展示 -->
+            <!-- SQL Token 視覺化 -->
             <div class="space-y-1 pt-1">
               <div class="text-[11px] text-slate-400 font-semibold">SQL 語法解析器視角 (Token Parsing)：</div>
               <div id="sb-tokens-display" class="flex flex-wrap gap-1.5 p-2 bg-slate-950 rounded-lg border border-slate-800"></div>
@@ -194,7 +194,7 @@
               <span id="sb-row-count" class="text-xs text-slate-500 font-mono">Row Count: 0</span>
             </div>
 
-            <!-- 分析與解說提示框 -->
+            <!-- 分析提示框 -->
             <div id="sb-analysis" class="p-3 text-xs rounded-xl bg-slate-50 border border-slate-200 text-slate-700 leading-relaxed"></div>
 
             <div class="overflow-x-auto border border-slate-100 rounded-lg">
@@ -683,49 +683,55 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
 
     // --- MOCK DB DATA ---
     const mockDBUsers = [
-      { id: 1, username: 'admin', role: 'Administrator (Hash: $2a$12$e8...)' },
-      { id: 2, username: 'alice', role: 'User (Hash: $2a$12$k9...)' },
-      { id: 3, username: 'bob', role: 'User (Hash: $2a$12$p3...)' }
+      { id: 1, username: 'admin', role: 'Administrator', pass: 'SuperSecretAdminPass2026!' },
+      { id: 2, username: 'alice', role: 'Developer', pass: 'alice2026pw' },
+      { id: 3, username: 'bob', role: 'HR Manager', pass: 'bobSecure99' },
+      { id: 4, username: 'charlie', role: 'Guest', pass: 'charlie1234' }
     ];
 
-    let sandboxState = {
-      mode: 'vulnerable', // 'vulnerable' | 'secure'
-      sleepTimer: null
-    };
+    // --- STATE MANAGEMENT ---
+    let sandboxMode = 'vulnerable'; // 'vulnerable' | 'secure'
 
-    // --- NAVIGATION SYSTEM ---
+    // --- NAVIGATION LOGIC ---
     function switchTab(tabId) {
       const tabs = ['learn', 'sandbox', 'defense', 'quiz', 'solutions'];
       tabs.forEach(t => {
-        const section = document.getElementById(`tab-${t}`);
-        const navBtn = document.getElementById(`nav-${t}`);
-        if (section) section.classList.add('hidden');
-        if (navBtn) {
-          navBtn.classList.remove('text-indigo-600', 'bg-indigo-50', 'font-semibold');
-          navBtn.classList.add('text-slate-600');
+        const navElem = document.getElementById(`nav-${t}`);
+        const tabElem = document.getElementById(`tab-${t}`);
+        if (t === tabId) {
+          tabElem.classList.remove('hidden');
+          navElem.className = "px-3 py-1.5 rounded-lg transition text-indigo-600 bg-white font-semibold shadow-sm";
+        } else {
+          tabElem.classList.add('hidden');
+          navElem.className = "px-3 py-1.5 rounded-lg transition text-slate-600 hover:bg-slate-200/60 hover:text-slate-900";
         }
       });
-
-      const activeSection = document.getElementById(`tab-${tabId}`);
-      const activeNavBtn = document.getElementById(`nav-${tabId}`);
-      if (activeSection) activeSection.classList.remove('hidden');
-      if (activeNavBtn) {
-        activeNavBtn.classList.add('text-indigo-600', 'bg-indigo-50', 'font-semibold');
-        activeNavBtn.classList.remove('text-slate-600');
-      }
-
       if (tabId === 'sandbox') {
         updatePayloadButtons();
         runSandbox();
       }
     }
 
-    // --- SANDBOX SYSTEM ---
+    function setDefenseTab(lang) {
+      const langs = ['python', 'node', 'php', 'java'];
+      langs.forEach(l => {
+        const btn = document.getElementById(`dtab-${l}`);
+        const code = document.getElementById(`dcode-${l}`);
+        if (l === lang) {
+          btn.className = "pb-2 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600";
+          code.classList.remove('hidden');
+        } else {
+          btn.className = "pb-2 text-sm font-bold text-slate-500 hover:text-slate-800";
+          code.classList.add('hidden');
+        }
+      });
+    }
+
+    // --- SANDBOX ENGINE LOGIC ---
     function setSandboxMode(mode) {
-      sandboxState.mode = mode;
+      sandboxMode = mode;
       const btnVuln = document.getElementById('mode-vuln');
       const btnSafe = document.getElementById('mode-safe');
-
       if (mode === 'vulnerable') {
         btnVuln.className = "px-3 py-1 text-xs font-bold rounded-md bg-white text-red-600 shadow-sm transition";
         btnSafe.className = "px-3 py-1 text-xs font-bold rounded-md text-slate-600 hover:text-slate-900 transition";
@@ -736,290 +742,291 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
       runSandbox();
     }
 
-    // 動態更新 Payload 按鈕 (與選擇情境連動)
     function updatePayloadButtons() {
       const scenario = document.getElementById('sb-scenario').value;
       const container = document.getElementById('sb-payload-container');
-      const payloads = scenarioPayloads[scenario] || [];
-
       container.innerHTML = '';
-
-      payloads.forEach((item, index) => {
+      
+      const payloads = scenarioPayloads[scenario] || [];
+      payloads.forEach((p) => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'px-2 py-0.5 text-[11px] bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 rounded font-mono border border-slate-200 transition-colors';
-        btn.textContent = item.label;
-        btn.onclick = () => setPayload(item.value);
+        btn.className = "px-2 py-1 text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md border border-slate-200 font-mono transition";
+        btn.innerText = p.label;
+        btn.onclick = () => {
+          document.getElementById('sb-input').value = p.value;
+          runSandbox();
+        };
         container.appendChild(btn);
-
-        // 預設填入第一個範例 Payload
-        if (index === 0) {
-          document.getElementById('sb-input').value = item.value;
-        }
       });
-    }
 
-    function setPayload(str) {
-      document.getElementById('sb-input').value = str;
-      runSandbox();
-    }
-
-    function runSandbox() {
-      if (sandboxState.sleepTimer) {
-        clearInterval(sandboxState.sleepTimer);
-        sandboxState.sleepTimer = null;
-      }
-      document.getElementById('sleep-timer-bar').classList.add('hidden');
-
-      const scenario = document.getElementById('sb-scenario').value;
-      const input = document.getElementById('sb-input').value;
-      const isVuln = sandboxState.mode === 'vulnerable';
-
-      let fullSQL = '';
-      let rows = [];
-      let statusText = '狀態：正常執行';
-      let statusClass = 'bg-emerald-100 text-emerald-800';
-      let logMsg = 'DB Log: 查詢成功回傳。';
-      let analysisText = '';
-
-      switch (scenario) {
-        case 'login':
-          if (isVuln) {
-            fullSQL = `SELECT * FROM users WHERE username = '${input}' AND password = 'xxx'`;
-            if (input.includes("' OR '1'='1") || input.includes("admin'--") || input.includes("' OR 1=1")) {
-              rows = [...mockDBUsers];
-              statusText = '⚠️ 繞過成功！(Extracted All Users)';
-              statusClass = 'bg-red-100 text-red-800';
-              logMsg = 'DB Log: WHERE 條件恆真，驗證邏輯遭繞過！';
-              analysisText = '<strong>漏洞分析：</strong> 動態拼接讓單引號閉合了字串，並插入 <code>OR \'1\'=\'1\'</code>，導致資料庫判定條件成立並回傳所有使用者。';
-            } else {
-              rows = mockDBUsers.filter(u => u.username === input);
-              analysisText = '<strong>一般查詢：</strong> 未觸發注入，依傳入字串精確比對。';
-            }
-          } else {
-            fullSQL = `PREPARE stmt FROM 'SELECT * FROM users WHERE username = ? AND password = ?';\nEXECUTE stmt USING "${input}", "xxx";`;
-            rows = mockDBUsers.filter(u => u.username === input);
-            statusClass = 'bg-emerald-100 text-emerald-800';
-            analysisText = '<strong>安全防禦：</strong> 預處理機制將整個 <code>' + escapeHTML(input) + '</code> 當成純字串，引號被自動轉義，無法改寫 SQL 結構。';
-          }
-          break;
-
-        case 'union':
-          if (isVuln) {
-            fullSQL = `SELECT id, title FROM articles WHERE id = 1 UNION SELECT id, username FROM users WHERE '${input}' = ''`;
-            if (input.toLowerCase().includes('union select')) {
-              fullSQL = `SELECT id, title FROM articles WHERE id = -1 ${input}`;
-              rows = [
-                { id: 1, username: 'admin', role: 'Hash: $2a$12$e8... [EXFILTRATED]' },
-                { id: 2, username: 'alice', role: 'Hash: $2a$12$k9... [EXFILTRATED]' }
-              ];
-              statusText = '⚠️ UNION 竊取資料成功！';
-              statusClass = 'bg-red-100 text-red-800';
-              logMsg = 'DB Log: UNION SELECT 成功跨表附加了 users 資料表！';
-              analysisText = '<strong>漏洞分析：</strong> 攻擊者透過 UNION 追加查詢，直接提取跨資料表的敏感資訊。';
-            } else {
-              rows = [{ id: 1, username: 'Article Title', role: 'Article Content' }];
-              analysisText = '請試著點選上方的 Payload 或輸入：<code>\' UNION SELECT id, username FROM users--</code>';
-            }
-          } else {
-            fullSQL = `PREPARE stmt FROM 'SELECT id, title FROM articles WHERE id = ?';\nEXECUTE stmt USING "${input}";`;
-            rows = [];
-            statusClass = 'bg-emerald-100 text-emerald-800';
-            analysisText = '<strong>安全防禦：</strong> 輸入被強制轉義或認定為參數，UNION 指令不被當作 SQL 語義執行。';
-          }
-          break;
-
-        case 'blind':
-          if (isVuln) {
-            fullSQL = `SELECT * FROM users WHERE id = 1 AND '${input}' = ''`;
-            if (input.includes("AND") || input.includes("'")) {
-              fullSQL = `SELECT * FROM users WHERE id = 1 ${input}`;
-              rows = [mockDBUsers[0]];
-              statusText = '回應：HTTP 200 OK (True)';
-              statusClass = 'bg-amber-100 text-amber-800';
-              logMsg = 'DB Response: True (回傳頁面正常，洩漏布林狀態)';
-              analysisText = '<strong>布林盲注：</strong> 雖然沒直接回傳敏感資料，但頁面狀況（True/False）暴露了子查詢條件的真偽。';
-            } else {
-              rows = [mockDBUsers[0]];
-              analysisText = '一般查詢中...';
-            }
-          } else {
-            fullSQL = `PREPARE stmt FROM 'SELECT * FROM users WHERE id = ?';\nEXECUTE stmt USING "${input}";`;
-            rows = [];
-            analysisText = '<strong>安全防禦：</strong> 參數化防禦切斷了布林邏輯拼貼的可能。';
-          }
-          break;
-
-        case 'sleep':
-          fullSQL = isVuln 
-            ? `SELECT * FROM users WHERE username = 'admin' ${input}`
-            : `PREPARE stmt FROM 'SELECT * FROM users WHERE username = ?';\nEXECUTE stmt USING "${input}";`;
-          
-          if (isVuln && input.toUpperCase().includes('SLEEP')) {
-            triggerSleepAnimation();
-            statusText = '⏱️ 時間盲注觸發 (Sleeping...)';
-            statusClass = 'bg-amber-100 text-amber-800';
-            logMsg = 'DB Log: 執行 SLEEP(3) 函數，回應延遲 3.00 秒！';
-            analysisText = '<strong>時間盲注：</strong> 攻擊者透過引起資料庫執行延遲函數（如 <code>SLEEP(3)</code>），觀察 HTTP 響應時間推算密碼或字串。';
-          } else {
-            rows = [mockDBUsers[0]];
-            analysisText = isVuln ? '試著輸入包含 <code>\' AND SLEEP(3)--</code> 的 Payload' : '<strong>安全防禦：</strong> 參數化查詢不執行文字中的 SLEEP 函數。';
-          }
-          break;
-
-        case 'orderby':
-          if (isVuln) {
-            fullSQL = `SELECT id, username, role FROM users ORDER BY ${input}`;
-            rows = [...mockDBUsers];
-            statusText = '⚠️ 警示：ORDER BY 直接動態拼接';
-            statusClass = 'bg-red-100 text-red-800';
-            logMsg = 'DB Log: 執行動態排序指令。';
-            analysisText = '<strong>陷阱警示：</strong> Prepared Statements 無法綁定 ORDER BY 欄位名稱。若直接拼接字串，攻擊者可帶入條件式盲注！';
-          } else {
-            const allowed = ['id', 'username', 'role'];
-            const cleanInput = allowed.includes(input.trim()) ? input.trim() : 'id';
-            fullSQL = `// 後端白名單驗證: const allowed = ['id','username','role'];\nSELECT id, username, role FROM users ORDER BY ${cleanInput}`;
-            rows = [...mockDBUsers];
-            statusText = '✅ 白名單過濾成功';
-            statusClass = 'bg-emerald-100 text-emerald-800';
-            logMsg = `DB Log: 安全通過白名單校驗 (採用欄位: ${cleanInput})`;
-            analysisText = '<strong>白名單防禦：</strong> 後端檢查傳入字串是否合法列於 allowed 清單中，否則降級至預設欄位 <code>id</code>。';
-          }
-          break;
-
-        case 'waf':
-          if (isVuln) {
-            fullSQL = `// 簡單黑名單 WAF (過濾 "OR " 小寫與空格)\nSELECT * FROM users WHERE username = '${input}'`;
-            const hasBlocked = input.includes("OR ") || input.includes("or ");
-            if (hasBlocked) {
-              statusText = '🛑 被 WAF 攔截 (403 Forbidden)';
-              statusClass = 'bg-red-100 text-red-800';
-              logMsg = 'WAF Alert: 檢測到黑名單關鍵字 OR！';
-              analysisText = '<strong>黑名單攔截：</strong> 簡單規則發揮了效果，但極易被繞過。';
-            } else if (input.includes("oR") || input.includes("Or") || input.includes("/**/")) {
-              rows = [...mockDBUsers];
-              statusText = '⚠️ WAF 遭到成功繞過 (Bypassed!)';
-              statusClass = 'bg-amber-100 text-amber-800';
-              logMsg = 'DB Log: 成功繞過 WAF 檢測並執行注入！';
-              analysisText = '<strong>WAF 繞過：</strong> 攻擊者使用大小寫混淆（如 <code>oR</code>）或註解分隔（<code>/**/</code>）成功偷渡黑名單！證明單靠 WAF 不安全。';
-            } else {
-              rows = mockDBUsers.filter(u => u.username === input);
-              analysisText = '請試著使用大小寫混淆（例如 <code>\' oR \'1\'=\'1</code>）嘗試繞過 WAF。';
-            }
-          } else {
-            fullSQL = `PREPARE stmt FROM 'SELECT * FROM users WHERE username = ?';\nEXECUTE stmt USING "${input}";`;
-            rows = [];
-            analysisText = '<strong>根本解決之道：</strong> 程式碼層級的預編譯參數化查詢能 100% 免疫此類混淆繞過。';
-          }
-          break;
-      }
-
-      // Update UI
-      document.getElementById('sb-sql-display').textContent = fullSQL;
-      renderTokens(fullSQL);
-
-      const statusBadge = document.getElementById('sb-status-badge');
-      statusBadge.textContent = statusText;
-      statusBadge.className = `px-2.5 py-0.5 rounded-full text-xs font-bold ${statusClass}`;
-
-      document.getElementById('sb-output-log').textContent = logMsg;
-      document.getElementById('sb-analysis').innerHTML = analysisText;
-
-      const tbody = document.getElementById('sb-db-rows');
-      tbody.innerHTML = '';
-      document.getElementById('sb-row-count').textContent = `Row Count: ${rows.length}`;
-
-      if (rows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400 italic">（無回傳資料）</td></tr>`;
-      } else {
-        rows.forEach(r => {
-          const tr = document.createElement('tr');
-          tr.className = "hover:bg-slate-50";
-          tr.innerHTML = `
-            <td class="p-2 font-bold text-slate-700">${r.id}</td>
-            <td class="p-2 text-indigo-600">${escapeHTML(r.username)}</td>
-            <td class="p-2 text-slate-500">${escapeHTML(r.role || r.content || '')}</td>
-          `;
-          tbody.appendChild(tr);
-        });
+      if (payloads.length > 0 && !document.getElementById('sb-input').value) {
+        document.getElementById('sb-input').value = payloads[0].value;
       }
     }
 
-    function triggerSleepAnimation() {
-      const timerBar = document.getElementById('sleep-timer-bar');
-      const progress = document.getElementById('sleep-progress');
-      const countdown = document.getElementById('sleep-countdown');
-      
-      timerBar.classList.remove('hidden');
-      progress.style.width = '0%';
-      
-      let start = Date.now();
-      let duration = 3000;
+    function tokenizeSQL(sqlStr) {
+      const keywords = ['SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'UNION', 'ORDER', 'BY', 'SLEEP', 'IF', 'LENGTH', 'SUBSTRING', 'LIKE', 'LIMIT', 'ASC', 'DESC'];
+      const tokens = [];
+      const parts = sqlStr.split(/(\s+|'[^']*'|--|#|\/\*.*?\*\/|=|\(\vert{}\)|,)/g).filter(Boolean);
 
-      sandboxState.sleepTimer = setInterval(() => {
-        let elapsed = Date.now() - start;
-        let remaining = Math.max(0, (duration - elapsed) / 1000);
-        let pct = Math.min(100, (elapsed / duration) * 100);
+      parts.forEach(part => {
+        const trimmed = part.trim();
+        if (!trimmed) return;
 
-        progress.style.width = `${pct}%`;
-        countdown.textContent = `${remaining.toFixed(1)}s`;
+        let type = 'identifier';
+        const upper = trimmed.toUpperCase();
 
-        if (elapsed >= duration) {
-          clearInterval(sandboxState.sleepTimer);
-          countdown.textContent = "完成！";
+        if (keywords.includes(upper)) {
+          type = 'keyword';
+        } else if (trimmed.startsWith("'") && trimmed.endsWith("'")) {
+          type = 'string';
+        } else if (trimmed === '--' || trimmed === '#' || trimmed.startsWith('/*')) {
+          type = 'comment';
+        } else if (['=', '>', '<', ',', '(', ')'].includes(trimmed)) {
+          type = 'operator';
+        } else if (!isNaN(trimmed)) {
+          type = 'number';
         }
-      }, 50);
+
+        tokens.push({ text: trimmed, type });
+      });
+
+      return tokens;
     }
 
-    function renderTokens(sqlStr) {
+    function renderTokens(tokens) {
       const display = document.getElementById('sb-tokens-display');
       display.innerHTML = '';
-      
-      const tokens = sqlStr.split(/(\s+|'[^']*'|--|SELECT|FROM|WHERE|AND|OR|UNION|ORDER BY|PREPARE|EXECUTE)/gi).filter(Boolean);
-      
-      tokens.forEach(tok => {
-        if (!tok.trim()) return;
+
+      tokens.forEach(t => {
         const span = document.createElement('span');
-        span.className = "px-2 py-0.5 rounded text-[11px] font-mono border ";
-        
-        const upper = tok.toUpperCase();
-        if (['SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'UNION', 'ORDER BY', 'PREPARE', 'EXECUTE'].includes(upper)) {
-          span.className += "bg-indigo-100 text-indigo-800 border-indigo-200 font-bold";
-        } else if (tok.startsWith("'") || tok.endsWith("'")) {
-          span.className += "bg-amber-100 text-amber-800 border-amber-200";
-        } else if (tok.includes('--')) {
-          span.className += "bg-slate-200 text-slate-600 border-slate-300 italic";
-        } else {
-          span.className += "bg-white text-slate-700 border-slate-200";
-        }
-        span.textContent = tok;
+        span.className = "px-1.5 py-0.5 rounded text-[10px] font-mono ";
+        if (t.type === 'keyword') span.className += "bg-indigo-950 text-indigo-300 font-bold border border-indigo-800";
+        else if (t.type === 'string') span.className += "bg-amber-950 text-amber-300 border border-amber-800";
+        else if (t.type === 'comment') span.className += "bg-slate-800 text-slate-400 italic border border-slate-700";
+        else if (t.type === 'operator') span.className += "bg-slate-800 text-rose-400 border border-slate-700";
+        else if (t.type === 'number') span.className += "bg-emerald-950 text-emerald-300 border border-emerald-800";
+        else span.className += "bg-slate-900 text-slate-200 border border-slate-800";
+
+        span.innerText = t.text;
         display.appendChild(span);
       });
     }
 
-    // --- DEFENSE CODE TABS ---
-    function setDefenseTab(lang) {
-      const langs = ['python', 'node', 'php', 'java'];
-      langs.forEach(l => {
-        document.getElementById(`dcode-${l}`).classList.add('hidden');
-        const btn = document.getElementById(`dtab-${l}`);
-        btn.className = "pb-2 text-sm font-bold text-slate-500 hover:text-slate-800";
-      });
-      document.getElementById(`dcode-${lang}`).classList.remove('hidden');
-      const activeBtn = document.getElementById(`dtab-${lang}`);
-      activeBtn.className = "pb-2 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600";
-    }
+    let sleepTimer = null;
 
-    // --- QUIZ SYSTEM ---
-    function shuffleArray(arr) {
-      const copy = [...arr];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
+    function runSandbox() {
+      if (sleepTimer) {
+        clearInterval(sleepTimer);
+        sleepTimer = null;
       }
-      return copy;
+      document.getElementById('sleep-timer-bar').classList.add('hidden');
+
+      const scenario = document.getElementById('sb-scenario').value;
+      const userInput = document.getElementById('sb-input').value;
+
+      const sqlDisplay = document.getElementById('sb-sql-display');
+      const badge = document.getElementById('sb-status-badge');
+      const rowsTbody = document.getElementById('sb-db-rows');
+      const rowCount = document.getElementById('sb-row-count');
+      const analysis = document.getElementById('sb-analysis');
+      const log = document.getElementById('sb-output-log');
+
+      rowsTbody.innerHTML = '';
+
+      let executedSQL = '';
+      let results = [];
+      let statusText = '狀態：正常執行';
+      let statusClass = 'bg-emerald-100 text-emerald-800';
+      let analysisHTML = '';
+      let serverLog = '';
+
+      if (sandboxMode === 'vulnerable') {
+        if (scenario === 'login') {
+          executedSQL = `SELECT id, username, role FROM users WHERE username = '${userInput}' AND status = 'active'`;
+          serverLog = `[Vulnerable Dynamic Query Executed]: ${executedSQL}`;
+
+          if (userInput.includes("' OR '1'='1") || userInput.includes("admin'--") || userInput.includes("' OR 1=1")) {
+            results = [...mockDBUsers];
+            statusText = '⚠️️ 成功攻破 (Injection Success)';
+            statusClass = 'bg-red-100 text-red-800';
+            analysisHTML = `<b class="text-red-600">🚨 攻擊觸發成功！</b> 輸入之字串跳脫了原本的引號邊界，注入之邏輯 <code>OR '1'='1'</code> 或註解符號 <code>--</code> 破壞了 WHERE 條件，資料庫傳回全數使用者，成功繞過登入！`;
+          } else {
+            results = mockDBUsers.filter(u => u.username === userInput);
+            analysisHTML = `目前輸入為一般純字串，未觸發 SQL 結構變更。`;
+          }
+        } 
+        else if (scenario === 'union') {
+          executedSQL = `SELECT id, username, role FROM users WHERE username = '${userInput}'`;
+          serverLog = `[Vulnerable Dynamic Query Executed]: ${executedSQL}`;
+
+          if (userInput.toUpperCase().includes('UNION') && userInput.toUpperCase().includes('SELECT')) {
+            statusText = '⚠️ 跨表資料竊取 (UNION Injected)';
+            statusClass = 'bg-red-100 text-red-800';
+            results = [
+              { id: 101, username: 'admin', role: 'HASH:$2b$12$e8Y4J2kP...' },
+              { id: 102, username: 'alice', role: 'HASH:$2b$12$k9L0P1mQ...' },
+              { id: 103, username: 'bob', role: 'HASH:$2b$12$z3X2V1cN...' }
+            ];
+            analysisHTML = `<b class="text-red-600">🚨 UNION 跨表聯合查詢成功！</b> 攻擊者強行將 <code>users</code> 資料表中的密碼 Hash 雜湊值拼接至原本的查詢結果集輸出。`;
+          } else {
+            results = mockDBUsers.filter(u => u.username === userInput);
+            analysisHTML = `未檢測到 UNION SELECT 語法。`;
+          }
+        }
+        else if (scenario === 'blind') {
+          executedSQL = `SELECT id, username, role FROM users WHERE id = 1 AND (${userInput})`;
+          serverLog = `[Boolean-Blind Simulation]: Processing Boolean logic condition...`;
+
+          let isTrue = false;
+          if (userInput.includes('LENGTH(database()) = 4') || userInput.includes("SUBSTRING(username,1,1)='a'")) {
+            isTrue = true;
+          }
+
+          if (isTrue) {
+            results = [mockDBUsers[0]];
+            statusText = '🎯 布林真值 (Boolean TRUE)';
+            statusClass = 'bg-emerald-100 text-emerald-800';
+            analysisHTML = `<b class="text-emerald-700">【頁面回應正常 (True)】</b> 攻擊者驗證其猜測條件為正確（如資料庫名稱長度為 4、或管理員首字為 'a'）。`;
+          } else {
+            results = [];
+            statusText = '❌ 布林假值 (Boolean FALSE)';
+            statusClass = 'bg-amber-100 text-amber-800';
+            analysisHTML = `<b class="text-amber-700">【頁面回應異常/無資料 (False)】</b> 攻擊者得知猜測條件錯誤，將繼續調整 Payload 進行逐字測驗。`;
+          }
+        }
+        else if (scenario === 'sleep') {
+          executedSQL = `SELECT id, username, role FROM users WHERE id = 1 AND (${userInput})`;
+          serverLog = `[Time-Based Simulation]: Checking for delay function...`;
+
+          if (userInput.toUpperCase().includes('SLEEP')) {
+            statusText = '⏱️ 時間延遲中 (SLEEP Executing)';
+            statusClass = 'bg-amber-100 text-amber-800';
+            analysisHTML = `<b class="text-amber-700">⏳ 時間延遲型盲注觸發！</b> 後端資料庫被強迫執行 <code>SLEEP(3)</code>，反應延遲 3 秒，攻擊者可藉此觀察 HTTP Response Time 確認猜測為真。`;
+
+            // Start visual timer
+            const timerBar = document.getElementById('sleep-timer-bar');
+            const countdownSpan = document.getElementById('sleep-countdown');
+            const progressBar = document.getElementById('sleep-progress');
+            timerBar.classList.remove('hidden');
+
+            let remainingMs = 3000;
+            const intervalMs = 50;
+            sleepTimer = setInterval(() => {
+              remainingMs -= intervalMs;
+              const sec = (remainingMs / 1000).toFixed(1);
+              countdownSpan.innerText = `${Math.max(0, sec)}s`;
+              const progressPct = ((3000 - remainingMs) / 3000) * 100;
+              progressBar.style.width = `${Math.min(100, progressPct)}%`;
+
+              if (remainingMs <= 0) {
+                clearInterval(sleepTimer);
+                sleepTimer = null;
+                results = [mockDBUsers[0]];
+                renderTableRows(results, rowsTbody, rowCount);
+                log.innerText = `[Server Log]: Delay completed (3000ms elapsed). Data returned.`;
+              }
+            }, intervalMs);
+          } else {
+            results = [mockDBUsers[0]];
+            analysisHTML = `未偵測到 SLEEP 函數。`;
+          }
+        }
+        else if (scenario === 'orderby') {
+          executedSQL = `SELECT id, username, role FROM users ORDER BY ${userInput}`;
+          serverLog = `[Dynamic Order By Dynamic SQL]: ${executedSQL}`;
+
+          if (userInput.toUpperCase().includes('IF') || userInput.includes('(')) {
+            statusText = '⚠️ ORDER BY 盲注觸發';
+            statusClass = 'bg-red-100 text-red-800';
+            results = [...mockDBUsers];
+            analysisHTML = `<b class="text-red-600">🚨 ORDER BY 注入攻擊！</b> 攻擊者在排序子句中注入了邏輯判斷 <code>IF(1=1, id, username)</code>，導致排序邏輯被控制或造成時間盲注。`;
+          } else {
+            results = [...mockDBUsers];
+            analysisHTML = `以欄位 <code>${userInput}</code> 進行動態排序。`;
+          }
+        }
+        else if (scenario === 'waf') {
+          executedSQL = `SELECT id, username, role FROM users WHERE username = '${userInput}'`;
+          
+          if (userInput.includes("OR '1'='1")) {
+            statusText = '🛡️ 被簡易 WAF 攔截';
+            statusClass = 'bg-purple-100 text-purple-800';
+            serverLog = `[WAF Blocked]: Detected blacklisted term 'OR' in request.`;
+            results = [];
+            analysisHTML = `<b class="text-purple-700">🛑 WAF 觸發攔截！</b> 簡易 WAF 的黑名單偵測到包含小寫/大寫連貫之 <code>OR</code> 關鍵字，直接封鎖請求。`;
+          } else if (userInput.includes("oR") || userInput.includes("/**/")) {
+            statusText = '⚠️ 成功繞過 WAF (WAF Bypassed)';
+            statusClass = 'bg-red-100 text-red-800';
+            serverLog = `[WAF Bypass Success]: Payload passed filter checks! SQL Executed: ${executedSQL}`;
+            results = [...mockDBUsers];
+            analysisHTML = `<b class="text-red-600">💥 成功繞過黑名單 WAF！</b> 攻擊者使用了大小寫混淆 <code>oR</code> 或註解符 <code>/**/</code>，規避了簡易黑名單規則，SQL Injection 依然成功！`;
+          } else {
+            results = mockDBUsers.filter(u => u.username === userInput);
+            analysisHTML = `未觸發 WAF 規則。`;
+          }
+        }
+      } 
+      else {
+        // --- DEFENSE MODE (PREPARED STATEMENTS) ---
+        if (scenario === 'orderby') {
+          const allowedCols = ['id', 'username', 'role'];
+          const safeCol = allowedCols.includes(userInput.trim()) ? userInput.trim() : 'id';
+          executedSQL = `SELECT id, username, role FROM users ORDER BY ${safeCol}  -- [White-listed Column]`;
+          serverLog = `[Secure Order By Guard]: Input validated against whitelist [${allowedCols.join(', ')}]. Selected column: ${safeCol}`;
+          results = [...mockDBUsers];
+          statusText = '🛡️ 安全排序 (Whitelisted)';
+          statusClass = 'bg-emerald-100 text-emerald-800';
+          analysisHTML = `<b class="text-emerald-700">✅ 白名單校驗生效！</b> 後端限定僅能使用 <code>id, username, role</code> 進行排序，任何注入之語法皆被視為非法並自動降級退回預設欄位 <code>id</code>。`;
+        } else {
+          executedSQL = `SELECT id, username, role FROM users WHERE username = ?  -- [Param: "${userInput.replace(/"/g, '\\"')}"]`;
+          serverLog = `[Prepared Statement Executed]: SQL structure compiled. Input bound strictly as string parameter.`;
+          
+          results = mockDBUsers.filter(u => u.username === userInput);
+          statusText = '🛡️ 安全預編譯 (Fully Protected)';
+          statusClass = 'bg-emerald-100 text-emerald-800';
+          analysisHTML = `<b class="text-emerald-700">🔒 預編譯參數化查詢 (Prepared Statements) 完整發揮作用！</b><br>傳入的單引號、<code>OR 1=1</code> 或 <code>UNION</code> 被資料庫直譯器<strong>僅視為純字串（資料值）</strong>，無法改變原本 SQL 的語法結構。查詢比對失敗回傳 0 筆資料，漏洞完美修復！`;
+        }
+      }
+
+      sqlDisplay.innerText = executedSQL;
+      badge.innerText = statusText;
+      badge.className = `px-2.5 py-0.5 rounded-full text-xs font-bold ${statusClass}`;
+      analysis.innerHTML = analysisHTML;
+      log.innerText = serverLog;
+
+      if (!userInput.toUpperCase().includes('SLEEP') || sandboxMode === 'secure') {
+        renderTableRows(results, rowsTbody, rowCount);
+      }
+
+      renderTokens(tokenizeSQL(executedSQL));
     }
 
+    function renderTableRows(results, tbody, countElem) {
+      tbody.innerHTML = '';
+      countElem.innerText = `Row Count: ${results.length}`;
+
+      if (results.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td colspan="3" class="p-4 text-center text-slate-400 italic">查無資料 (0 rows returned)</td>`;
+        tbody.appendChild(tr);
+        return;
+      }
+
+      results.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition";
+        tr.innerHTML = `
+          <td class="p-2.5 font-bold text-slate-700">${r.id}</td>
+          <td class="p-2.5 text-indigo-600 font-semibold">${r.username}</td>
+          <td class="p-2.5 text-slate-600">${r.role}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- QUIZ ENGINE LOGIC ---
     function startQuiz(e) {
       e.preventDefault();
       const cls = document.getElementById('user-class').value.trim();
@@ -1029,16 +1036,16 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
       if (!cls || !seat || !name) return;
 
       currentQuizUser = { cls, seat, name };
-      document.getElementById('quiz-display-user').textContent = `${cls} / ${seat}號 / ${name}`;
 
-      // 隨機自 18 題庫中抽 10 題
-      activeQuizQuestions = shuffleArray(questionBank).slice(0, 10);
-
-      renderQuizQuestions();
+      // Shuffle & pick 10 random questions
+      const shuffled = [...questionBank].sort(() => 0.5 - Math.random());
+      activeQuizQuestions = shuffled.slice(0, 10);
 
       document.getElementById('quiz-auth-card').classList.add('hidden');
       document.getElementById('quiz-window').classList.remove('hidden');
-      document.getElementById('quiz-result-card').classList.add('hidden');
+      document.getElementById('quiz-display-user').innerText = `${cls} - ${seat}號 ${name}`;
+
+      renderQuizQuestions();
     }
 
     function renderQuizQuestions() {
@@ -1047,23 +1054,24 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
 
       activeQuizQuestions.forEach((q, idx) => {
         const card = document.createElement('div');
-        card.className = "bg-white border border-slate-200 rounded-xl p-5 space-y-3 shadow-sm";
-        
+        card.className = "bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-3";
+
         let optionsHTML = '';
         q.options.forEach((opt, oIdx) => {
           optionsHTML += `
-            <label class="flex items-start space-x-3 p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:border-indigo-300 transition">
-              <input type="radio" name="q_${q.id}" value="${oIdx}" class="mt-0.5 text-indigo-600 focus:ring-indigo-500">
-              <span class="text-xs text-slate-700 font-sans leading-snug">${escapeHTML(opt)}</span>
+            <label class="flex items-start gap-2.5 p-2.5 rounded-xl border border-slate-100 hover:bg-slate-50 cursor-pointer transition text-xs text-slate-700">
+              <input type="radio" name="q-${q.id}" value="${oIdx}" class="mt-0.5 text-indigo-600 focus:ring-indigo-500">
+              <span>${String.fromCharCode(65 + oIdx)}. ${opt}</span>
             </label>
           `;
         });
 
         card.innerHTML = `
-          <div class="font-bold text-slate-900 text-sm">
-            <span class="text-indigo-600 mr-1.5">Q${idx + 1}.</span> ${escapeHTML(q.question)}
+          <div class="font-bold text-slate-900 text-xs md:text-sm flex gap-2">
+            <span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md font-mono h-fit text-xs">Q${idx + 1}</span>
+            <span>${q.question}</span>
           </div>
-          <div class="space-y-2">
+          <div class="space-y-1.5 pt-1">
             ${optionsHTML}
           </div>
         `;
@@ -1076,20 +1084,19 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
       let correctCount = 0;
 
       activeQuizQuestions.forEach(q => {
-        const selected = document.querySelector(`input[name="q_${q.id}"]:checked`);
+        const selected = document.querySelector(`input[name="q-${q.id}"]:checked`);
         if (selected && parseInt(selected.value) === q.answer) {
+          score += 10;
           correctCount++;
         }
       });
 
-      score = correctCount * 10;
-
-      document.getElementById('result-user-info').textContent = `${currentQuizUser.cls} - ${currentQuizUser.seat}號 - ${currentQuizUser.name}`;
-      document.getElementById('result-score').textContent = `${score} 分`;
-      document.getElementById('result-count').textContent = `${correctCount} / 10`;
-
       document.getElementById('quiz-window').classList.add('hidden');
       document.getElementById('quiz-result-card').classList.remove('hidden');
+
+      document.getElementById('result-user-info').innerText = `考生：${currentQuizUser.cls} - ${currentQuizUser.seat}號 ${currentQuizUser.name}`;
+      document.getElementById('result-score').innerText = score;
+      document.getElementById('result-count').innerText = correctCount;
     }
 
     function retakeQuiz() {
@@ -1097,72 +1104,74 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
       document.getElementById('quiz-auth-card').classList.remove('hidden');
     }
 
-    // --- TEACHER CONTROL & SOLUTIONS ---
+    // --- SOLUTIONS & TEACHER CONTROL LOGIC ---
     function togglePublishAnswers() {
       const toggle = document.getElementById('teacher-publish-toggle');
-      const label = document.getElementById('switch-status-label');
 
       if (toggle.checked) {
-        const pwd = prompt("請輸入教師管理密碼以公佈解答：");
-        if (pwd === TEACHER_PASSWORD) {
+        const inputPw = prompt("請輸入教師解鎖密碼：");
+        if (inputPw === TEACHER_PASSWORD) {
           isAnswersPublished = true;
-          label.textContent = "目前狀態：已公佈解答";
-          label.className = "text-xs font-bold text-emerald-400";
-          renderUnlockedSolutions();
+          document.getElementById('switch-status-label').innerText = "目前狀態：已公佈答案與解析";
+          document.getElementById('switch-status-label').className = "text-xs font-bold text-emerald-400";
+          document.getElementById('solutions-locked-msg').classList.add('hidden');
+          document.getElementById('solutions-unlocked-content').classList.remove('hidden');
+          renderAllSolutions();
         } else {
-          alert("密碼錯誤！無法解鎖解答區。");
+          alert("❌ 密碼錯誤！無法開啟解答。");
           toggle.checked = false;
         }
       } else {
         isAnswersPublished = false;
-        label.textContent = "目前狀態：未公佈";
-        label.className = "text-xs font-bold text-amber-400";
+        document.getElementById('switch-status-label').innerText = "目前狀態：未公佈";
+        document.getElementById('switch-status-label').className = "text-xs font-bold text-amber-400";
         document.getElementById('solutions-locked-msg').classList.remove('hidden');
         document.getElementById('solutions-unlocked-content').classList.add('hidden');
       }
     }
 
-    function renderUnlockedSolutions() {
-      const lockedMsg = document.getElementById('solutions-locked-msg');
+    function renderAllSolutions() {
       const container = document.getElementById('solutions-unlocked-content');
-      
-      lockedMsg.classList.add('hidden');
-      container.classList.remove('hidden');
       container.innerHTML = '';
 
-      questionBank.forEach((q, i) => {
-        const item = document.createElement('div');
-        item.className = "border border-slate-200 rounded-xl p-5 bg-white space-y-2 text-xs shadow-sm";
-        
-        item.innerHTML = `
-          <div class="font-bold text-slate-900 text-sm">
-            <span class="text-indigo-600 mr-1">Q${i + 1}.</span> ${escapeHTML(q.question)}
+      questionBank.forEach((q) => {
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-3";
+
+        let optionsHTML = '';
+        q.options.forEach((opt, oIdx) => {
+          const isCorrect = oIdx === q.answer;
+          optionsHTML += `
+            <div class="p-2.5 rounded-xl border ${isCorrect ? 'bg-emerald-50 border-emerald-300 font-bold text-emerald-900' : 'bg-slate-50 border-slate-100 text-slate-500'} text-xs">
+              ${isCorrect ? '✅' : '⚪'} ${String.fromCharCode(65 + oIdx)}. ${opt}
+            </div>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="font-bold text-slate-900 text-xs md:text-sm flex items-center justify-between">
+            <span class="flex items-center gap-2">
+              <span class="bg-indigo-600 text-white px-2 py-0.5 rounded-md font-mono text-xs">題號 #${q.id}</span>
+              ${q.question}
+            </span>
+            <span class="text-xs font-semibold text-emerald-600">標準答案: (${String.fromCharCode(65 + q.answer)})</span>
           </div>
-          <div class="bg-emerald-50 border border-emerald-200 text-emerald-900 p-2.5 rounded font-semibold">
-            ✅ 正確答案：${escapeHTML(q.options[q.answer])}
+          <div class="space-y-1.5">
+            ${optionsHTML}
           </div>
-          <div class="text-slate-600 leading-relaxed pt-1">
-            <span class="font-bold text-slate-700">解析：</span>${escapeHTML(q.explanation)}
+          <div class="p-3 bg-amber-50/60 border border-amber-200/60 rounded-xl text-xs text-amber-900 leading-relaxed">
+            <span class="font-bold text-amber-950">💡 詳細觀念解析：</span> ${q.explanation}
           </div>
         `;
-        container.appendChild(item);
+        container.appendChild(card);
       });
     }
 
-    function escapeHTML(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    // 初始化頁面
-    document.addEventListener('DOMContentLoaded', () => {
+    // --- INITIALIZATION ---
+    window.onload = () => {
       updatePayloadButtons();
-    });
+      runSandbox();
+    };
   </script>
 </body>
 </html>
