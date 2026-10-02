@@ -18,7 +18,7 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
 
-  <!-- HEADER / NAVBAR (淺色系風格) -->
+  <!-- HEADER / NAVBAR -->
   <header class="bg-white text-slate-800 border-b border-slate-200 shadow-sm sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center space-x-3">
@@ -427,6 +427,8 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
     let isAnswersPublished = false;
     let currentQuizUser = { cls: '', seat: '', name: '' };
     let activeQuizQuestions = [];
+    let sandboxMode = 'vulnerable'; // 'vulnerable' | 'secure'
+    let sleepTimer = null;
 
     // --- 各情境專屬 Payload 資料庫 ---
     const scenarioPayloads = {
@@ -681,48 +683,42 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
       }
     ];
 
-    // --- MOCK DB DATA ---
-    const mockDBUsers = [
-      { id: 1, username: 'admin', role: 'Administrator', pass: 'SuperSecretAdminPass2026!' },
-      { id: 2, username: 'alice', role: 'Developer', pass: 'alice2026pw' },
-      { id: 3, username: 'bob', role: 'HR Manager', pass: 'bobSecure99' },
-      { id: 4, username: 'charlie', role: 'Guest', pass: 'charlie1234' }
-    ];
+    // --- MOCK DATABASE TABLES ---
+    const mockDb = {
+      users: [
+        { id: 1, username: 'admin', role: 'Administrator (Hash: $2b$12$e9...)' },
+        { id: 2, username: 'alice', role: 'Standard User' },
+        { id: 3, username: 'bob', role: 'Developer' }
+      ]
+    };
 
-    // --- STATE MANAGEMENT ---
-    let sandboxMode = 'vulnerable'; // 'vulnerable' | 'secure'
-
-    // --- NAVIGATION LOGIC ---
-    function switchTab(tabId) {
+    // --- TAB SWITCHING LOGIC ---
+    function switchTab(tabName) {
       const tabs = ['learn', 'sandbox', 'defense', 'quiz', 'solutions'];
       tabs.forEach(t => {
-        const navElem = document.getElementById(`nav-${t}`);
-        const tabElem = document.getElementById(`tab-${t}`);
-        if (t === tabId) {
-          tabElem.classList.remove('hidden');
-          navElem.className = "px-3 py-1.5 rounded-lg transition text-indigo-600 bg-white font-semibold shadow-sm";
+        const sec = document.getElementById(`tab-${t}`);
+        const nav = document.getElementById(`nav-${t}`);
+        if (t === tabName) {
+          sec.classList.remove('hidden');
+          nav.className = "px-3 py-1.5 rounded-lg transition text-indigo-600 bg-white font-semibold shadow-sm";
         } else {
-          tabElem.classList.add('hidden');
-          navElem.className = "px-3 py-1.5 rounded-lg transition text-slate-600 hover:bg-slate-200/60 hover:text-slate-900";
+          sec.classList.add('hidden');
+          nav.className = "px-3 py-1.5 rounded-lg transition text-slate-600 hover:bg-slate-200/60 hover:text-slate-900";
         }
       });
-      if (tabId === 'sandbox') {
-        updatePayloadButtons();
-        runSandbox();
-      }
+      if (tabName === 'sandbox') runSandbox();
     }
 
     function setDefenseTab(lang) {
-      const langs = ['python', 'node', 'php', 'java'];
-      langs.forEach(l => {
+      ['python', 'node', 'php', 'java'].forEach(l => {
+        const codeDiv = document.getElementById(`dcode-${l}`);
         const btn = document.getElementById(`dtab-${l}`);
-        const code = document.getElementById(`dcode-${l}`);
         if (l === lang) {
+          codeDiv.classList.remove('hidden');
           btn.className = "pb-2 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600";
-          code.classList.remove('hidden');
         } else {
+          codeDiv.classList.add('hidden');
           btn.className = "pb-2 text-sm font-bold text-slate-500 hover:text-slate-800";
-          code.classList.add('hidden');
         }
       });
     }
@@ -730,14 +726,14 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
     // --- SANDBOX ENGINE LOGIC ---
     function setSandboxMode(mode) {
       sandboxMode = mode;
-      const btnVuln = document.getElementById('mode-vuln');
-      const btnSafe = document.getElementById('mode-safe');
+      const vBtn = document.getElementById('mode-vuln');
+      const sBtn = document.getElementById('mode-safe');
       if (mode === 'vulnerable') {
-        btnVuln.className = "px-3 py-1 text-xs font-bold rounded-md bg-white text-red-600 shadow-sm transition";
-        btnSafe.className = "px-3 py-1 text-xs font-bold rounded-md text-slate-600 hover:text-slate-900 transition";
+        vBtn.className = "px-3 py-1 text-xs font-bold rounded-md bg-white text-red-600 shadow-sm transition";
+        sBtn.className = "px-3 py-1 text-xs font-bold rounded-md text-slate-600 hover:text-slate-900 transition";
       } else {
-        btnSafe.className = "px-3 py-1 text-xs font-bold rounded-md bg-white text-emerald-600 shadow-sm transition";
-        btnVuln.className = "px-3 py-1 text-xs font-bold rounded-md text-slate-600 hover:text-slate-900 transition";
+        sBtn.className = "px-3 py-1 text-xs font-bold rounded-md bg-white text-emerald-600 shadow-sm transition";
+        vBtn.className = "px-3 py-1 text-xs font-bold rounded-md text-slate-600 hover:text-slate-900 transition";
       }
       runSandbox();
     }
@@ -746,12 +742,10 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
       const scenario = document.getElementById('sb-scenario').value;
       const container = document.getElementById('sb-payload-container');
       container.innerHTML = '';
-      
-      const payloads = scenarioPayloads[scenario] || [];
-      payloads.forEach((p) => {
+      const list = scenarioPayloads[scenario] || [];
+      list.forEach(p => {
         const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = "px-2 py-1 text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md border border-slate-200 font-mono transition";
+        btn.className = "px-2 py-1 text-[11px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded border border-indigo-200 transition font-mono";
         btn.innerText = p.label;
         btn.onclick = () => {
           document.getElementById('sb-input').value = p.value;
@@ -759,291 +753,193 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
         };
         container.appendChild(btn);
       });
-
-      if (payloads.length > 0 && !document.getElementById('sb-input').value) {
-        document.getElementById('sb-input').value = payloads[0].value;
+      if (list.length > 0) {
+        document.getElementById('sb-input').value = list[0].value;
       }
-    }
-
-    function tokenizeSQL(sqlStr) {
-      const keywords = ['SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'UNION', 'ORDER', 'BY', 'SLEEP', 'IF', 'LENGTH', 'SUBSTRING', 'LIKE', 'LIMIT', 'ASC', 'DESC'];
-      const tokens = [];
-      const parts = sqlStr.split(/(\s+|'[^']*'|--|#|\/\*.*?\*\/|=|\(\vert{}\)|,)/g).filter(Boolean);
-
-      parts.forEach(part => {
-        const trimmed = part.trim();
-        if (!trimmed) return;
-
-        let type = 'identifier';
-        const upper = trimmed.toUpperCase();
-
-        if (keywords.includes(upper)) {
-          type = 'keyword';
-        } else if (trimmed.startsWith("'") && trimmed.endsWith("'")) {
-          type = 'string';
-        } else if (trimmed === '--' || trimmed === '#' || trimmed.startsWith('/*')) {
-          type = 'comment';
-        } else if (['=', '>', '<', ',', '(', ')'].includes(trimmed)) {
-          type = 'operator';
-        } else if (!isNaN(trimmed)) {
-          type = 'number';
-        }
-
-        tokens.push({ text: trimmed, type });
-      });
-
-      return tokens;
     }
 
     function renderTokens(tokens) {
-      const display = document.getElementById('sb-tokens-display');
-      display.innerHTML = '';
-
-      tokens.forEach(t => {
-        const span = document.createElement('span');
-        span.className = "px-1.5 py-0.5 rounded text-[10px] font-mono ";
-        if (t.type === 'keyword') span.className += "bg-indigo-950 text-indigo-300 font-bold border border-indigo-800";
-        else if (t.type === 'string') span.className += "bg-amber-950 text-amber-300 border border-amber-800";
-        else if (t.type === 'comment') span.className += "bg-slate-800 text-slate-400 italic border border-slate-700";
-        else if (t.type === 'operator') span.className += "bg-slate-800 text-rose-400 border border-slate-700";
-        else if (t.type === 'number') span.className += "bg-emerald-950 text-emerald-300 border border-emerald-800";
-        else span.className += "bg-slate-900 text-slate-200 border border-slate-800";
-
-        span.innerText = t.text;
-        display.appendChild(span);
+      const container = document.getElementById('sb-tokens-display');
+      container.innerHTML = '';
+      tokens.forEach(tok => {
+        const badge = document.createElement('span');
+        badge.className = `px-1.5 py-0.5 rounded text-[10px] font-mono border ${tok.color}`;
+        badge.innerText = tok.text;
+        container.appendChild(badge);
       });
     }
 
-    let sleepTimer = null;
-
     function runSandbox() {
-      if (sleepTimer) {
-        clearInterval(sleepTimer);
-        sleepTimer = null;
-      }
+      if (sleepTimer) clearInterval(sleepTimer);
       document.getElementById('sleep-timer-bar').classList.add('hidden');
 
       const scenario = document.getElementById('sb-scenario').value;
-      const userInput = document.getElementById('sb-input').value;
-
+      const input = document.getElementById('sb-input').value;
       const sqlDisplay = document.getElementById('sb-sql-display');
-      const badge = document.getElementById('sb-status-badge');
-      const rowsTbody = document.getElementById('sb-db-rows');
-      const rowCount = document.getElementById('sb-row-count');
-      const analysis = document.getElementById('sb-analysis');
-      const log = document.getElementById('sb-output-log');
+      const statusBadge = document.getElementById('sb-status-badge');
+      const analysisBox = document.getElementById('sb-analysis');
+      const dbRows = document.getElementById('sb-db-rows');
+      const rowCountSpan = document.getElementById('sb-row-count');
+      const logSpan = document.getElementById('sb-output-log');
 
-      rowsTbody.innerHTML = '';
-
-      let executedSQL = '';
+      let queryText = "";
+      let tokens = [];
       let results = [];
-      let statusText = '狀態：正常執行';
-      let statusClass = 'bg-emerald-100 text-emerald-800';
-      let analysisHTML = '';
-      let serverLog = '';
+      let isError = false;
+      let logMsg = "Query executed successfully.";
+      let analysisText = "";
 
-      if (sandboxMode === 'vulnerable') {
-        if (scenario === 'login') {
-          executedSQL = `SELECT id, username, role FROM users WHERE username = '${userInput}' AND status = 'active'`;
-          serverLog = `[Vulnerable Dynamic Query Executed]: ${executedSQL}`;
-
-          if (userInput.includes("' OR '1'='1") || userInput.includes("admin'--") || userInput.includes("' OR 1=1")) {
-            results = [...mockDBUsers];
-            statusText = '⚠️️ 成功攻破 (Injection Success)';
-            statusClass = 'bg-red-100 text-red-800';
-            analysisHTML = `<b class="text-red-600">🚨 攻擊觸發成功！</b> 輸入之字串跳脫了原本的引號邊界，注入之邏輯 <code>OR '1'='1'</code> 或註解符號 <code>--</code> 破壞了 WHERE 條件，資料庫傳回全數使用者，成功繞過登入！`;
-          } else {
-            results = mockDBUsers.filter(u => u.username === userInput);
-            analysisHTML = `目前輸入為一般純字串，未觸發 SQL 結構變更。`;
-          }
-        } 
-        else if (scenario === 'union') {
-          executedSQL = `SELECT id, username, role FROM users WHERE username = '${userInput}'`;
-          serverLog = `[Vulnerable Dynamic Query Executed]: ${executedSQL}`;
-
-          if (userInput.toUpperCase().includes('UNION') && userInput.toUpperCase().includes('SELECT')) {
-            statusText = '⚠️ 跨表資料竊取 (UNION Injected)';
-            statusClass = 'bg-red-100 text-red-800';
-            results = [
-              { id: 101, username: 'admin', role: 'HASH:$2b$12$e8Y4J2kP...' },
-              { id: 102, username: 'alice', role: 'HASH:$2b$12$k9L0P1mQ...' },
-              { id: 103, username: 'bob', role: 'HASH:$2b$12$z3X2V1cN...' }
-            ];
-            analysisHTML = `<b class="text-red-600">🚨 UNION 跨表聯合查詢成功！</b> 攻擊者強行將 <code>users</code> 資料表中的密碼 Hash 雜湊值拼接至原本的查詢結果集輸出。`;
-          } else {
-            results = mockDBUsers.filter(u => u.username === userInput);
-            analysisHTML = `未檢測到 UNION SELECT 語法。`;
-          }
+      // WAF Filtering Check
+      if (scenario === 'waf') {
+        if (input.includes(" OR ") || input.includes(" or ")) {
+          sqlDisplay.innerText = "HTTP/1.1 403 Forbidden\n[WAF Blocked]: Malicious SQL keyword 'OR' detected!";
+          statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800";
+          statusBadge.innerText = "狀態：WAF 阻擋";
+          analysisBox.innerHTML = "<span class='text-red-600 font-bold'>⚠️ 觸發過濾：</span>簡單的 WAF 黑名單檢測到了精緻的小寫/大寫 <code>' OR '</code> 關鍵字並直接攔截了請求。";
+          dbRows.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-slate-400">403 Request Blocked</td></tr>`;
+          rowCountSpan.innerText = "Row Count: 0";
+          logSpan.innerText = "[WAF Alert] Rule #102 triggered. Input dropped.";
+          renderTokens([{ text: "BLOCKED", color: "bg-red-950 text-red-400 border-red-800" }]);
+          return;
         }
-        else if (scenario === 'blind') {
-          executedSQL = `SELECT id, username, role FROM users WHERE id = 1 AND (${userInput})`;
-          serverLog = `[Boolean-Blind Simulation]: Processing Boolean logic condition...`;
+      }
 
-          let isTrue = false;
-          if (userInput.includes('LENGTH(database()) = 4') || userInput.includes("SUBSTRING(username,1,1)='a'")) {
-            isTrue = true;
-          }
-
-          if (isTrue) {
-            results = [mockDBUsers[0]];
-            statusText = '🎯 布林真值 (Boolean TRUE)';
-            statusClass = 'bg-emerald-100 text-emerald-800';
-            analysisHTML = `<b class="text-emerald-700">【頁面回應正常 (True)】</b> 攻擊者驗證其猜測條件為正確（如資料庫名稱長度為 4、或管理員首字為 'a'）。`;
-          } else {
-            results = [];
-            statusText = '❌ 布林假值 (Boolean FALSE)';
-            statusClass = 'bg-amber-100 text-amber-800';
-            analysisHTML = `<b class="text-amber-700">【頁面回應異常/無資料 (False)】</b> 攻擊者得知猜測條件錯誤，將繼續調整 Payload 進行逐字測驗。`;
-          }
-        }
-        else if (scenario === 'sleep') {
-          executedSQL = `SELECT id, username, role FROM users WHERE id = 1 AND (${userInput})`;
-          serverLog = `[Time-Based Simulation]: Checking for delay function...`;
-
-          if (userInput.toUpperCase().includes('SLEEP')) {
-            statusText = '⏱️ 時間延遲中 (SLEEP Executing)';
-            statusClass = 'bg-amber-100 text-amber-800';
-            analysisHTML = `<b class="text-amber-700">⏳ 時間延遲型盲注觸發！</b> 後端資料庫被強迫執行 <code>SLEEP(3)</code>，反應延遲 3 秒，攻擊者可藉此觀察 HTTP Response Time 確認猜測為真。`;
-
-            // Start visual timer
-            const timerBar = document.getElementById('sleep-timer-bar');
-            const countdownSpan = document.getElementById('sleep-countdown');
-            const progressBar = document.getElementById('sleep-progress');
-            timerBar.classList.remove('hidden');
-
-            let remainingMs = 3000;
-            const intervalMs = 50;
-            sleepTimer = setInterval(() => {
-              remainingMs -= intervalMs;
-              const sec = (remainingMs / 1000).toFixed(1);
-              countdownSpan.innerText = `${Math.max(0, sec)}s`;
-              const progressPct = ((3000 - remainingMs) / 3000) * 100;
-              progressBar.style.width = `${Math.min(100, progressPct)}%`;
-
-              if (remainingMs <= 0) {
-                clearInterval(sleepTimer);
-                sleepTimer = null;
-                results = [mockDBUsers[0]];
-                renderTableRows(results, rowsTbody, rowCount);
-                log.innerText = `[Server Log]: Delay completed (3000ms elapsed). Data returned.`;
-              }
-            }, intervalMs);
-          } else {
-            results = [mockDBUsers[0]];
-            analysisHTML = `未偵測到 SLEEP 函數。`;
-          }
-        }
-        else if (scenario === 'orderby') {
-          executedSQL = `SELECT id, username, role FROM users ORDER BY ${userInput}`;
-          serverLog = `[Dynamic Order By Dynamic SQL]: ${executedSQL}`;
-
-          if (userInput.toUpperCase().includes('IF') || userInput.includes('(')) {
-            statusText = '⚠️ ORDER BY 盲注觸發';
-            statusClass = 'bg-red-100 text-red-800';
-            results = [...mockDBUsers];
-            analysisHTML = `<b class="text-red-600">🚨 ORDER BY 注入攻擊！</b> 攻擊者在排序子句中注入了邏輯判斷 <code>IF(1=1, id, username)</code>，導致排序邏輯被控制或造成時間盲注。`;
-          } else {
-            results = [...mockDBUsers];
-            analysisHTML = `以欄位 <code>${userInput}</code> 進行動態排序。`;
-          }
-        }
-        else if (scenario === 'waf') {
-          executedSQL = `SELECT id, username, role FROM users WHERE username = '${userInput}'`;
-          
-          if (userInput.includes("OR '1'='1")) {
-            statusText = '🛡️ 被簡易 WAF 攔截';
-            statusClass = 'bg-purple-100 text-purple-800';
-            serverLog = `[WAF Blocked]: Detected blacklisted term 'OR' in request.`;
-            results = [];
-            analysisHTML = `<b class="text-purple-700">🛑 WAF 觸發攔截！</b> 簡易 WAF 的黑名單偵測到包含小寫/大寫連貫之 <code>OR</code> 關鍵字，直接封鎖請求。`;
-          } else if (userInput.includes("oR") || userInput.includes("/**/")) {
-            statusText = '⚠️ 成功繞過 WAF (WAF Bypassed)';
-            statusClass = 'bg-red-100 text-red-800';
-            serverLog = `[WAF Bypass Success]: Payload passed filter checks! SQL Executed: ${executedSQL}`;
-            results = [...mockDBUsers];
-            analysisHTML = `<b class="text-red-600">💥 成功繞過黑名單 WAF！</b> 攻擊者使用了大小寫混淆 <code>oR</code> 或註解符 <code>/**/</code>，規避了簡易黑名單規則，SQL Injection 依然成功！`;
-          } else {
-            results = mockDBUsers.filter(u => u.username === userInput);
-            analysisHTML = `未觸發 WAF 規則。`;
-          }
-        }
-      } 
-      else {
-        // --- DEFENSE MODE (PREPARED STATEMENTS) ---
+      // Safe / Vulnerable Logic Handling
+      if (sandboxMode === 'secure') {
+        statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800";
+        statusBadge.innerText = "狀態：安全預編譯模式";
+        
         if (scenario === 'orderby') {
-          const allowedCols = ['id', 'username', 'role'];
-          const safeCol = allowedCols.includes(userInput.trim()) ? userInput.trim() : 'id';
-          executedSQL = `SELECT id, username, role FROM users ORDER BY ${safeCol}  -- [White-listed Column]`;
-          serverLog = `[Secure Order By Guard]: Input validated against whitelist [${allowedCols.join(', ')}]. Selected column: ${safeCol}`;
-          results = [...mockDBUsers];
-          statusText = '🛡️ 安全排序 (Whitelisted)';
-          statusClass = 'bg-emerald-100 text-emerald-800';
-          analysisHTML = `<b class="text-emerald-700">✅ 白名單校驗生效！</b> 後端限定僅能使用 <code>id, username, role</code> 進行排序，任何注入之語法皆被視為非法並自動降級退回預設欄位 <code>id</code>。`;
+          const allowed = ['id', 'username', 'role'];
+          if (allowed.includes(input.trim())) {
+            queryText = `SELECT * FROM users ORDER BY ${input.trim()}`;
+            results = [...mockDb.users].sort((a,b) => a[input.trim()] > b[input.trim()] ? 1 : -1);
+            analysisText = "🛡️ <strong>白名單過濾成功：</strong>輸入值在白名單之中，正常執行排序。";
+          } else {
+            queryText = `SELECT * FROM users ORDER BY id -- (Fallback to default)`;
+            results = [...mockDb.users];
+            analysisText = "🛡️ <strong>白名單防禦成功：</strong>輸入值不在許可的欄位名單中，系統自動降級回預設 <code>id</code> 排序，惡意注入無效！";
+          }
         } else {
-          executedSQL = `SELECT id, username, role FROM users WHERE username = ?  -- [Param: "${userInput.replace(/"/g, '\\"')}"]`;
-          serverLog = `[Prepared Statement Executed]: SQL structure compiled. Input bound strictly as string parameter.`;
-          
-          results = mockDBUsers.filter(u => u.username === userInput);
-          statusText = '🛡️ 安全預編譯 (Fully Protected)';
-          statusClass = 'bg-emerald-100 text-emerald-800';
-          analysisHTML = `<b class="text-emerald-700">🔒 預編譯參數化查詢 (Prepared Statements) 完整發揮作用！</b><br>傳入的單引號、<code>OR 1=1</code> 或 <code>UNION</code> 被資料庫直譯器<strong>僅視為純字串（資料值）</strong>，無法改變原本 SQL 的語法結構。查詢比對失敗回傳 0 筆資料，漏洞完美修復！`;
+          queryText = `PREPARE stmt FROM 'SELECT * FROM users WHERE name = ?';\nEXECUTE stmt USING '${input.replace(/'/g, "''")}';`;
+          const matches = mockDb.users.filter(u => u.username === input);
+          results = matches;
+          analysisText = "🛡️ <strong>預編譯 (Prepared Statements) 防禦成功：</strong>不論輸入包含什麼 <code>'</code> 或 SQL 關鍵字，資料庫僅將輸入值當成純字串比對，攻擊完全失效！";
+        }
+
+        tokens = [
+          { text: "SELECT * FROM users WHERE name =", color: "bg-indigo-950 text-indigo-300 border-indigo-800" },
+          { text: `PARAM: "${input}"`, color: "bg-emerald-950 text-emerald-300 border-emerald-800" }
+        ];
+
+      } else {
+        // Vulnerable Mode
+        statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800";
+        statusBadge.innerText = "狀態：高風險動態拼接";
+
+        if (scenario === 'orderby') {
+          queryText = `SELECT * FROM users ORDER BY ${input}`;
+          results = mockDb.users;
+          analysisText = "⚠️ <strong>動態 ORDER BY 拼接危害：</strong>攻擊者可在此處構造盲注邏輯（如 <code>IF(1=1, id, username)</code>），直接利用回應順序推算敏感資料！";
+          tokens = [
+            { text: "SELECT * FROM users ORDER BY", color: "bg-indigo-950 text-indigo-300 border-indigo-800" },
+            { text: input, color: "bg-red-950 text-red-300 border-red-800" }
+          ];
+        } else {
+          queryText = `SELECT * FROM users WHERE name = '${input}' AND is_active = 1`;
+          tokens = [
+            { text: "SELECT * FROM users WHERE name =", color: "bg-indigo-950 text-indigo-300 border-indigo-800" },
+            { text: `'${input}'`, color: "bg-red-950 text-red-300 border-red-800" },
+            { text: "AND is_active = 1", color: "bg-indigo-950 text-indigo-300 border-indigo-800" }
+          ];
+
+          // Simulation of injections
+          if (input.includes("' OR '1'='1") || input.includes("' OR 1=1") || input.includes("admin'--")) {
+            results = mockDb.users; // Bypass success!
+            analysisText = "💥 <strong>注入成功 (繞過身分驗證)：</strong>邏輯判斷被破壞，恒真條件 <code>1=1</code> 使資料庫回傳全部使用者，包含 Admin！";
+          } else if (input.includes("UNION SELECT")) {
+            results = [
+              ...mockDb.users,
+              { id: 99, username: 'DB_VERSION: PostgreSQL 15.2', role: 'SYSTEM_META_DATA' }
+            ];
+            analysisText = "💥 <strong>UNION 跨表查詢成功：</strong>強行把資料庫元資料附加於結果中！";
+          } else if (input.includes("SLEEP(")) {
+            results = mockDb.users;
+            analysisText = "⏱️ <strong>時間盲注觸發：</strong>資料庫被迫執行延遲函數，回應時間顯著拉長！";
+            triggerSleepAnimation();
+          } else if (input.includes("LENGTH(") || input.includes("SUBSTRING(")) {
+            results = [mockDb.users[0]];
+            analysisText = "🕵️ <strong>布林盲注條件成立 (True)：</strong>回應畫面正常，攻擊者可知猜測字符正確！";
+          } else if (input.includes("1=2")) {
+            results = [];
+            analysisText = "🕵️ <strong>布林盲注條件不成立 (False)：</strong>回應無資料，攻擊者可知猜測字符錯誤。";
+          } else {
+            results = mockDb.users.filter(u => u.username === input);
+            analysisText = "ℹ️ 一般普通查詢模式：輸入無觸發特殊注入條件。";
+          }
         }
       }
 
-      sqlDisplay.innerText = executedSQL;
-      badge.innerText = statusText;
-      badge.className = `px-2.5 py-0.5 rounded-full text-xs font-bold ${statusClass}`;
-      analysis.innerHTML = analysisHTML;
-      log.innerText = serverLog;
+      sqlDisplay.innerText = queryText;
+      analysisBox.innerHTML = analysisText;
+      renderTokens(tokens);
 
-      if (!userInput.toUpperCase().includes('SLEEP') || sandboxMode === 'secure') {
-        renderTableRows(results, rowsTbody, rowCount);
+      // Render DB Rows
+      dbRows.innerHTML = '';
+      rowCountSpan.innerText = `Row Count: ${results.length}`;
+      if (results.length === 0) {
+        dbRows.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-slate-400">Query returned 0 rows</td></tr>`;
+      } else {
+        results.forEach(r => {
+          const tr = document.createElement('tr');
+          tr.className = "hover:bg-slate-50";
+          tr.innerHTML = `<td class="p-2.5 font-bold text-slate-700">${r.id}</td><td class="p-2.5 text-indigo-600 font-semibold">${r.username}</td><td class="p-2.5 text-slate-600">${r.role}</td>`;
+          dbRows.appendChild(tr);
+        });
       }
-
-      renderTokens(tokenizeSQL(executedSQL));
+      logSpan.innerText = logMsg;
     }
 
-    function renderTableRows(results, tbody, countElem) {
-      tbody.innerHTML = '';
-      countElem.innerText = `Row Count: ${results.length}`;
+    function triggerSleepAnimation() {
+      const timerBar = document.getElementById('sleep-timer-bar');
+      const progress = document.getElementById('sleep-progress');
+      const countdown = document.getElementById('sleep-countdown');
+      timerBar.classList.remove('hidden');
 
-      if (results.length === 0) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td colspan="3" class="p-4 text-center text-slate-400 italic">查無資料 (0 rows returned)</td>`;
-        tbody.appendChild(tr);
-        return;
-      }
+      let remain = 3.0;
+      progress.style.width = '0%';
+      const start = Date.now();
+      const total = 3000;
 
-      results.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50 transition";
-        tr.innerHTML = `
-          <td class="p-2.5 font-bold text-slate-700">${r.id}</td>
-          <td class="p-2.5 text-indigo-600 font-semibold">${r.username}</td>
-          <td class="p-2.5 text-slate-600">${r.role}</td>
-        `;
-        tbody.appendChild(tr);
-      });
+      sleepTimer = setInterval(() => {
+        const elapsed = Date.now() - start;
+        const p = Math.min(100, (elapsed / total) * 100);
+        progress.style.width = p + '%';
+        remain = Math.max(0, (total - elapsed) / 1000).toFixed(1);
+        countdown.innerText = remain + 's';
+
+        if (elapsed >= total) {
+          clearInterval(sleepTimer);
+          countdown.innerText = '完成！';
+        }
+      }, 50);
     }
 
     // --- QUIZ ENGINE LOGIC ---
     function startQuiz(e) {
       e.preventDefault();
-      const cls = document.getElementById('user-class').value.trim();
-      const seat = document.getElementById('user-seat').value.trim();
-      const name = document.getElementById('user-name').value.trim();
-
-      if (!cls || !seat || !name) return;
-
+      const cls = document.getElementById('user-class').value;
+      const seat = document.getElementById('user-seat').value;
+      const name = document.getElementById('user-name').value;
       currentQuizUser = { cls, seat, name };
-
-      // Shuffle & pick 10 random questions
-      const shuffled = [...questionBank].sort(() => 0.5 - Math.random());
-      activeQuizQuestions = shuffled.slice(0, 10);
 
       document.getElementById('quiz-auth-card').classList.add('hidden');
       document.getElementById('quiz-window').classList.remove('hidden');
       document.getElementById('quiz-display-user').innerText = `${cls} - ${seat}號 ${name}`;
+
+      // Pick 10 random questions from bank
+      const shuffled = [...questionBank].sort(() => 0.5 - Math.random());
+      activeQuizQuestions = shuffled.slice(0, 10);
 
       renderQuizQuestions();
     }
@@ -1053,29 +949,24 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
       container.innerHTML = '';
 
       activeQuizQuestions.forEach((q, idx) => {
-        const card = document.createElement('div');
-        card.className = "bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-3";
+        const qCard = document.createElement('div');
+        qCard.className = "bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3";
+        
+        let optionsHtml = q.options.map((opt, oIdx) => `
+          <label class="flex items-start space-x-2.5 p-2 rounded-lg hover:bg-slate-50 cursor-pointer text-xs border border-slate-100">
+            <input type="radio" name="q_${q.id}" value="${oIdx}" class="mt-0.5 text-indigo-600 focus:ring-indigo-500">
+            <span class="text-slate-700">${opt}</span>
+          </label>
+        `).join('');
 
-        let optionsHTML = '';
-        q.options.forEach((opt, oIdx) => {
-          optionsHTML += `
-            <label class="flex items-start gap-2.5 p-2.5 rounded-xl border border-slate-100 hover:bg-slate-50 cursor-pointer transition text-xs text-slate-700">
-              <input type="radio" name="q-${q.id}" value="${oIdx}" class="mt-0.5 text-indigo-600 focus:ring-indigo-500">
-              <span>${String.fromCharCode(65 + oIdx)}. ${opt}</span>
-            </label>
-          `;
-        });
-
-        card.innerHTML = `
-          <div class="font-bold text-slate-900 text-xs md:text-sm flex gap-2">
-            <span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md font-mono h-fit text-xs">Q${idx + 1}</span>
+        qCard.innerHTML = `
+          <div class="font-bold text-slate-900 text-sm flex gap-2">
+            <span class="text-indigo-600 font-mono">Q${idx + 1}.</span>
             <span>${q.question}</span>
           </div>
-          <div class="space-y-1.5 pt-1">
-            ${optionsHTML}
-          </div>
+          <div class="space-y-1.5">${optionsHtml}</div>
         `;
-        container.appendChild(card);
+        container.appendChild(qCard);
       });
     }
 
@@ -1084,7 +975,7 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
       let correctCount = 0;
 
       activeQuizQuestions.forEach(q => {
-        const selected = document.querySelector(`input[name="q-${q.id}"]:checked`);
+        const selected = document.querySelector(`input[name="q_${q.id}"]:checked`);
         if (selected && parseInt(selected.value) === q.answer) {
           score += 10;
           correctCount++;
@@ -1104,18 +995,21 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
       document.getElementById('quiz-auth-card').classList.remove('hidden');
     }
 
-    // --- SOLUTIONS & TEACHER CONTROL LOGIC ---
+    // --- TEACHER SOLUTION CONTROL LOGIC ---
     function togglePublishAnswers() {
       const toggle = document.getElementById('teacher-publish-toggle');
+      const statusLabel = document.getElementById('switch-status-label');
+      const lockedMsg = document.getElementById('solutions-locked-msg');
+      const unlockedContent = document.getElementById('solutions-unlocked-content');
 
       if (toggle.checked) {
-        const inputPw = prompt("請輸入教師解鎖密碼：");
-        if (inputPw === TEACHER_PASSWORD) {
+        const pwd = prompt("🔐 請輸入教師管理密碼以發布解答：");
+        if (pwd === TEACHER_PASSWORD) {
           isAnswersPublished = true;
-          document.getElementById('switch-status-label').innerText = "目前狀態：已公佈答案與解析";
-          document.getElementById('switch-status-label').className = "text-xs font-bold text-emerald-400";
-          document.getElementById('solutions-locked-msg').classList.add('hidden');
-          document.getElementById('solutions-unlocked-content').classList.remove('hidden');
+          statusLabel.innerText = "目前狀態：已公佈答案";
+          statusLabel.className = "text-xs font-bold text-emerald-400";
+          lockedMsg.classList.add('hidden');
+          unlockedContent.classList.remove('hidden');
           renderAllSolutions();
         } else {
           alert("❌ 密碼錯誤！無法開啟解答。");
@@ -1123,10 +1017,10 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
         }
       } else {
         isAnswersPublished = false;
-        document.getElementById('switch-status-label').innerText = "目前狀態：未公佈";
-        document.getElementById('switch-status-label').className = "text-xs font-bold text-amber-400";
-        document.getElementById('solutions-locked-msg').classList.remove('hidden');
-        document.getElementById('solutions-unlocked-content').classList.add('hidden');
+        statusLabel.innerText = "目前狀態：未公佈";
+        statusLabel.className = "text-xs font-bold text-amber-400";
+        lockedMsg.classList.remove('hidden');
+        unlockedContent.classList.add('hidden');
       }
     }
 
@@ -1134,33 +1028,21 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
       const container = document.getElementById('solutions-unlocked-content');
       container.innerHTML = '';
 
-      questionBank.forEach((q) => {
+      questionBank.forEach((q, idx) => {
         const card = document.createElement('div');
-        card.className = "bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-3";
-
-        let optionsHTML = '';
-        q.options.forEach((opt, oIdx) => {
-          const isCorrect = oIdx === q.answer;
-          optionsHTML += `
-            <div class="p-2.5 rounded-xl border ${isCorrect ? 'bg-emerald-50 border-emerald-300 font-bold text-emerald-900' : 'bg-slate-50 border-slate-100 text-slate-500'} text-xs">
-              ${isCorrect ? '✅' : '⚪'} ${String.fromCharCode(65 + oIdx)}. ${opt}
-            </div>
-          `;
-        });
+        card.className = "bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2 text-xs";
+        
+        const ansText = q.options[q.answer];
 
         card.innerHTML = `
-          <div class="font-bold text-slate-900 text-xs md:text-sm flex items-center justify-between">
-            <span class="flex items-center gap-2">
-              <span class="bg-indigo-600 text-white px-2 py-0.5 rounded-md font-mono text-xs">題號 #${q.id}</span>
-              ${q.question}
-            </span>
-            <span class="text-xs font-semibold text-emerald-600">標準答案: (${String.fromCharCode(65 + q.answer)})</span>
+          <div class="font-bold text-slate-900 text-sm">
+            <span class="text-indigo-600 font-mono">${q.id}.</span> ${q.question}
           </div>
-          <div class="space-y-1.5">
-            ${optionsHTML}
+          <div class="p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-lg font-bold">
+            正解：${ansText}
           </div>
-          <div class="p-3 bg-amber-50/60 border border-amber-200/60 rounded-xl text-xs text-amber-900 leading-relaxed">
-            <span class="font-bold text-amber-950">💡 詳細觀念解析：</span> ${q.explanation}
+          <div class="p-3 bg-slate-50 rounded-lg text-slate-600 leading-relaxed border border-slate-100">
+            💡 <strong>詳細解析：</strong> ${q.explanation}
           </div>
         `;
         container.appendChild(card);
@@ -1170,7 +1052,6 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
     // --- INITIALIZATION ---
     window.onload = () => {
       updatePayloadButtons();
-      runSandbox();
     };
   </script>
 </body>
