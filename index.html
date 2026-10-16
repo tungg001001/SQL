@@ -327,7 +327,7 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
       <!-- 登入與身份設定卡片 -->
       <div id="quiz-auth-card" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 max-w-xl mx-auto space-y-4">
         <h2 class="text-lg font-bold text-slate-900 text-center">📝 SQL Injection 觀念評量測驗</h2>
-        <p class="text-xs text-slate-500 text-center">請輸入個人基本資料以開始測驗（系統將隨機自題庫抽取 10 題，成績將自動登記）</p>
+        <p class="text-xs text-slate-500 text-center">請輸入個人基本資料以開始測驗（系統將隨機自題庫抽取 10 題，成績將自動同步）</p>
 
         <form onsubmit="startQuiz(event)" class="space-y-3 text-xs">
           <div>
@@ -376,7 +376,7 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
           <div class="text-xs text-slate-400 mt-2">答對題數：<span id="result-count">0</span> / 10</div>
         </div>
 
-        <p class="text-xs text-emerald-600 font-semibold">✨ 成績已自動記錄於系統總表中！</p>
+        <p class="text-xs text-emerald-600 font-semibold">✨ 成績已自動跨裝置同步並記錄於雲端試算表中！</p>
 
         <button onclick="retakeQuiz()" class="px-6 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-lg transition">重新測驗</button>
       </div>
@@ -415,16 +415,19 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
           <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-100 pb-3">
             <div>
               <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
-                <span>📊</span> 學生成績紀錄清單
+                <span>📊</span> 學生成績紀錄清單 (GAS 雲端即時同步)
               </h3>
-              <p class="text-xs text-slate-500">記錄學生在本機產生的測驗分數，支援即時搜尋與 Excel (CSV) 匯出。</p>
+              <p class="text-xs text-slate-500">自動匯集各裝置學生的測驗分數，支援即時搜尋與 Excel (CSV) 匯出。</p>
             </div>
             <div class="flex items-center gap-2">
+              <button onclick="renderGradeTable()" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 rounded-lg text-xs font-semibold transition flex items-center gap-1">
+                🔄 重新整理雲端資料
+              </button>
               <button onclick="exportGradesCSV()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm">
                 <span>📥</span> 匯出 CSV (Excel)
               </button>
               <button onclick="clearGradesHistory()" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold transition">
-                🗑️ 清除所有紀錄
+                🗑️ 清除本機快取
               </button>
             </div>
           </div>
@@ -482,6 +485,10 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
   <script>
     // --- GLOBAL CONSTANTS & CONFIG ---
     const TEACHER_PASSWORD = "teacher123"; // 教師管理密碼
+    
+    // ⚠️ 請替換為你個人部署的 Google Apps Script Web App URL
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyEisYxf4J1SoJGrPat4iewzknskJ5_F3-RKKJQczwkQl44fU3EisrmlWJ3kCfurGhiag/exec";
+
     let isAnswersPublished = false;
     let currentQuizUser = { cls: '', seat: '', name: '' };
     let activeQuizQuestions = [];
@@ -593,7 +600,7 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
           "因為 ORDER BY 只能接受數字"
         ],
         answer: 0,
-        explanation: "Prepared Statements 僅能將參數綁定為 Value (資料值)，不能綁定 Table/Column 名稱，否則會被自動加上引號變成字串導致語法錯誤。"
+        explanation: "Prepared Statements 僅能將參數綁定為 Value (資料值)，不能綁定 Table/Column 名稱，否則會被自動加上引號變成字串導致語意錯誤。"
       },
       {
         id: 7,
@@ -665,113 +672,120 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
           "它是用於防止 SQLi 的安全性模組"
         ],
         answer: 0,
-        explanation: "攻擊者在 UNION SQLi 中常查詢 `INFORMATION_SCHEMA.TABLES` 與 `COLUMNS` 來探查整個資料庫的架構。"
+        explanation: "攻擊者在 UNION SQLi 中常透過查詢 INFORMATION_SCHEMA 來清查目標資料庫中的所有資料表與欄位結構。"
       },
       {
         id: 13,
-        question: "使用 ORM 框架（例如 Entity Framework, Sequelize, Django ORM）是否就「絕對不會」發生 SQLi？",
+        question: "若在 SQL 查詢中傳入 `' UNION SELECT 1, @@version--`，其主要目的是什麼？",
         options: [
-          "否，若在 ORM 中使用了原生的Raw Query (如 `.raw()` 或 `.extra()`) 並拼接字串，依然會產生 SQLi",
-          "是，只要使用 ORM 就不可能出現任何 SQLi 漏洞",
-          "是，因為 ORM 會自動關閉資料庫的連線",
-          "否，因為 ORM 只支援 NoSQL 資料庫"
+          "獲取目標資料庫管理系統 (DBMS) 的版本資訊",
+          "將資料庫升級至最新版本",
+          "查詢目前的線上使用者人數",
+          "清除資料庫快取"
         ],
         answer: 0,
-        explanation: "許多 ORM 允許開發者編寫 Raw SQL，若在此處誤用動態拼接字串，依然會導致嚴重漏洞。"
+        explanation: "@@version 是 MySQL 等資料庫中的系統全域變數，能回傳 DBMS 的具體版本號。"
       },
       {
         id: 14,
-        question: "在二次注入 (Second-Order SQL Injection) 中，惡意 Payload 是如何被觸發的？",
+        question: "在使用 PDO (PHP Data Objects) 時，何種設定能確保完全防止模擬預編譯 (Emulated Prepares) 帶來的潛在風險？",
         options: [
-          "Payload 首次被安全地儲存至資料庫中，但在後續被其他程式邏輯取出並進行二次 SQL 拼接時被執行",
-          "攻擊者連續發送兩次相同的 HTTP 請求",
-          "攻擊者同時利用 SQLi 與 XSS 兩種漏洞",
-          "資料庫連續發生兩次崩潰"
+          "$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);",
+          "$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);",
+          "$pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);",
+          "$pdo->setAttribute(PDO::ATTR_AUTOCOMMIT, true);"
         ],
         answer: 0,
-        explanation: "二次注入是指輸入存入資料庫時未觸發漏洞，但在後續流程被取出作為另一條動態 SQL 拼接的變數時才爆發。"
+        explanation: "將 ATTR_EMULATE_PREPARES 設為 false 能關閉 PHP 層級的模擬預編譯，強制使用資料庫原生的 Prepared Statements。"
       },
       {
         id: 15,
-        question: "關於最小權限原則 (Principle of Least Privilege)，下列何者正確？",
+        question: "二次注入 (Second-Order SQL Injection) 的特徵是什麼？",
         options: [
-          "Web 應用程式連接資料庫時，不應使用 root/sa 等高權限帳號，以降低 SQLi 爆發時的損害",
-          "資料庫密碼長度不應超過 8 個字元",
-          "限制使用者每天只能登入 3 次",
-          "不允許使用者更換密碼"
+          "攻擊 Payload 先被安全地儲存於資料庫中，待後續其他功能呼叫並拼接該資料時才觸發注入",
+          "攻擊者連續發送兩次一模一樣的 HTTP 請求",
+          "攻擊者同時向兩台不同的伺服器發動 SQLi",
+          "攻擊者使用兩種不同的程式語言進行攻擊"
         ],
         answer: 0,
-        explanation: "落實最小權限原則能降低風險，即使發生 SQLi，攻擊者也無法執行 `DROP DATABASE` 或讀取系統敏感檔案。"
+        explanation: "二次注入的 Payload 初次輸入時被合規存入 DB，但後續程式在取用該欄位進行二次 SQL 查詢時未經參數化處理而引爆漏洞。"
       },
       {
         id: 16,
-        question: "下列何者是 PHP 中防止 SQL Injection 的安全 PDO 寫法？",
+        question: "下列何者為堆疊查詢 (Stacked Queries) 的特徵？",
         options: [
-          "$stmt =$pdo->prepare('SELECT * FROM users WHERE name = :name'); $stmt->execute(['name' =>$name]);",
-          "$pdo->query(\"SELECT * FROM users WHERE name = '$name'\");",
-          "$pdo->exec(\"SELECT * FROM users WHERE name = \" . $_GET['name']);",
-          "eval(\"SELECT * FROM users WHERE name = $name\");"
+          "使用分號 (;) 在單一 HTTP 請求中一次執行多條獨立的 SQL 指令",
+          "使用 UNION 結合兩組 SELECT 結果",
+          "使用巢狀子查詢 (Subquery)",
+          "使用 OR 運算子串聯多個條件"
         ],
         answer: 0,
-        explanation: "使用 `$pdo->prepare()` 與具名綁定 `:name` 並搭配 `execute()` 才是正確的參數化防禦方式。"
+        explanation: "Stacked Queries 利用 `;` 分開多條 SQL，可直接執行 DROP TABLE 或 INSERT 等毀滅性指令（需要 API 驅動支援，如 PHP mysqli_multi_query）。"
       },
       {
         id: 17,
-        question: "在 Python sqlite3 中，下列哪一種寫法才是正確且安全的參數化查詢？",
+        question: "在 Python sqlite3 中，下列哪一段程式碼是【絕對安全】的參數化查詢？",
         options: [
-          "cursor.execute(\"SELECT * FROM users WHERE name = ?\", (name,))",
-          "cursor.execute(\"SELECT * FROM users WHERE name = '\" + name + \"'\")",
-          "cursor.execute(f\"SELECT * FROM users WHERE name = '{name}'\")",
-          "cursor.execute(\"SELECT * FROM users WHERE name = %s\" % name)"
+          "cursor.execute(\"SELECT * FROM users WHERE name = ?\", (user_input,))",
+          "cursor.execute(f\"SELECT * FROM users WHERE name = '{user_input}'\")",
+          "cursor.execute(\"SELECT * FROM users WHERE name = '%s'\" % user_input)",
+          "cursor.execute(\"SELECT * FROM users WHERE name = '\" + user_input + \"'\")"
         ],
         answer: 0,
-        explanation: "使用佔位符 `?` 並將變數以 Tuple `(name,)` 傳入，才能發揮參數化查詢的預編譯效果；其餘三種皆屬於危險的動態字串拼接。"
+        explanation: "使用 `?` 作為占位符並以元組 (tuple) 形式傳入變數，才是標準且安全的 Prepared Statement 寫法。"
       },
       {
         id: 18,
-        question: "Web 應用程式防火牆 (WAF) 能否完全取代程式碼層級的參數化查詢 (Prepared Statements)？",
+        question: "使用 ORM (如 Entity Framework, Sequelize, SQLAlchemy) 時，是否就代表永遠不會產生 SQL Injection？",
         options: [
-          "不能，WAF 僅能作為縱深防禦層，攻擊者常可透過編碼或混淆繞過 WAF 規則",
-          "能，WAF 可以百分之百攔截所有類型的 SQL Injection",
-          "能，只要安裝 WAF 後端程式即可隨意拼接 SQL",
-          "不能，因為 WAF 只支援防範 XSS 攻擊"
+          "否，若開發者在 ORM 中使用原生 SQL 查詢 (Raw Queries) 或字串拼接，依然會產生 SQLi",
+          "是，只要使用了 ORM，系統就會有 100% 的絕對安全防禦",
+          "是，因為 ORM 會自動對所有作業系統層級進行加密",
+          "否，因為 ORM 只適用於 NoSQL 資料庫"
         ],
         answer: 0,
-        explanation: "WAF 屬於縱深防禦的一環，無法保證 100% 攔截，程式碼層級的參數化查詢才是防範 SQLi 的根本所在。"
+        explanation: "ORM 預設查詢是安全的，但如果工程師在 ORM 框架內呼叫 raw Query 介面並使用字串拼接，依然會爆發 SQLi 漏洞。"
       }
     ];
 
     // --- TAB SWITCHING LOGIC ---
-    function switchTab(tabId) {
-      ['learn', 'sandbox', 'defense', 'quiz', 'solutions'].forEach(t => {
-        const el = document.getElementById(`tab-${t}`);
-        const nav = document.getElementById(`nav-${t}`);
-        if (t === tabId) {
-          el.classList.remove('hidden');
-          nav.className = "px-3 py-1.5 rounded-lg transition text-indigo-600 bg-white font-semibold shadow-sm";
+    function switchTab(tabName) {
+      const tabs = ['learn', 'sandbox', 'defense', 'quiz', 'solutions'];
+      tabs.forEach(tab => {
+        const section = document.getElementById(`tab-${tab}`);
+        const navBtn = document.getElementById(`nav-${tab}`);
+        if (tab === tabName) {
+          section.classList.remove('hidden');
+          navBtn.className = "px-3 py-1.5 rounded-lg transition text-indigo-600 bg-white font-semibold shadow-sm";
         } else {
-          el.classList.add('hidden');
-          nav.className = "px-3 py-1.5 rounded-lg transition text-slate-600 hover:bg-slate-200/60 hover:text-slate-900";
+          section.classList.add('hidden');
+          navBtn.className = "px-3 py-1.5 rounded-lg transition text-slate-600 hover:bg-slate-200/60 hover:text-slate-900";
         }
       });
-      if (tabId === 'sandbox') runSandbox();
+
+      if (tabName === 'sandbox') {
+        updatePayloadButtons();
+        runSandbox();
+      }
     }
 
+    // --- DEFENSE CODE TAB SWITCHING ---
     function setDefenseTab(lang) {
-      ['python', 'node', 'php', 'java'].forEach(l => {
-        const codeEl = document.getElementById(`dcode-${l}`);
-        const btnEl = document.getElementById(`dtab-${l}`);
+      const langs = ['python', 'node', 'php', 'java'];
+      langs.forEach(l => {
+        const codeDiv = document.getElementById(`dcode-${l}`);
+        const tabBtn = document.getElementById(`dtab-${l}`);
         if (l === lang) {
-          codeEl.classList.remove('hidden');
-          btnEl.className = "pb-2 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600";
+          codeDiv.classList.remove('hidden');
+          tabBtn.className = "pb-2 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600";
         } else {
-          codeEl.classList.add('hidden');
-          btnEl.className = "pb-2 text-sm font-bold text-slate-500 hover:text-slate-800";
+          codeDiv.classList.add('hidden');
+          tabBtn.className = "pb-2 text-sm font-bold text-slate-500 hover:text-slate-800";
         }
       });
     }
 
-    // --- SANDBOX SIMULATION ENGINE ---
+    // --- SANDBOX LOGIC ---
     function setSandboxMode(mode) {
       sandboxMode = mode;
       const btnVuln = document.getElementById('mode-vuln');
@@ -790,29 +804,23 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
       const scenario = document.getElementById('sb-scenario').value;
       const container = document.getElementById('sb-payload-container');
       container.innerHTML = '';
+      
       const payloads = scenarioPayloads[scenario] || [];
       payloads.forEach(p => {
         const btn = document.createElement('button');
-        btn.className = "px-2 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded text-[11px] font-mono text-slate-700 transition";
-        btn.textContent = p.label;
+        btn.className = "px-2.5 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 rounded border border-slate-200 text-[11px] font-mono transition";
+        btn.innerText = p.label;
         btn.onclick = () => {
           document.getElementById('sb-input').value = p.value;
           runSandbox();
         };
         container.appendChild(btn);
       });
-      if (payloads.length > 0) {
+
+      if (payloads.length > 0 && !document.getElementById('sb-input').value) {
         document.getElementById('sb-input').value = payloads[0].value;
-      } else {
-        document.getElementById('sb-input').value = '';
       }
     }
-
-    const mockDBUsers = [
-      { id: 1, username: 'admin', role: 'Administrator (Secret Hash: $2b$10$e8...)' },
-      { id: 2, username: 'alice', role: 'Standard User' },
-      { id: 3, username: 'bob', role: 'Standard User' }
-    ];
 
     function runSandbox() {
       if (sleepTimer) clearInterval(sleepTimer);
@@ -820,214 +828,224 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
 
       const scenario = document.getElementById('sb-scenario').value;
       const input = document.getElementById('sb-input').value;
+      
       const sqlDisplay = document.getElementById('sb-sql-display');
       const tokensDisplay = document.getElementById('sb-tokens-display');
-      const badge = document.getElementById('sb-status-badge');
-      const analysis = document.getElementById('sb-analysis');
+      const statusBadge = document.getElementById('sb-status-badge');
       const dbRows = document.getElementById('sb-db-rows');
-      const rowCount = document.getElementById('sb-row-count');
-      const log = document.getElementById('sb-output-log');
+      const rowCountSpan = document.getElementById('sb-row-count');
+      const analysisDiv = document.getElementById('sb-analysis');
+      const serverLog = document.getElementById('sb-output-log');
 
-      let sql = "";
-      let rows = [];
-      let statusText = "正常執行";
-      let statusClass = "bg-emerald-100 text-emerald-800";
+      const defaultUsers = [
+        { id: 1, name: 'admin', role: 'Administrator (HASH: $2b$12$eXaMpLeHaSh...)' },
+        { id: 2, name: 'alice', role: 'Standard User' },
+        { id: 3, name: 'bob', role: 'Standard User' }
+      ];
+
+      let generatedSQL = "";
+      let isExploited = false;
+      let rowsToRender = [];
       let analysisText = "";
-      let logText = "";
+      let logMessage = "Query executed successfully.";
 
-      let isBlockedByWaf = false;
-      if (scenario === 'waf' && sandboxMode === 'vulnerable') {
-        if (input.includes(" OR ") || input.includes(" or ")) {
-          isBlockedByWaf = true;
-        }
-      }
-
-      if (isBlockedByWaf) {
-        sql = `SELECT * FROM users WHERE username = '${input}'`;
-        statusText = "WAF 攔截 (403 Forbidden)";
-        statusClass = "bg-red-100 text-red-800";
-        analysisText = "🚨 <strong>WAF 觸發黑名單！</strong> 檢測到敏感情字 <code>' OR '</code>，請求已被直接阻斷。";
-        logText = "WAF Event: Rule #1002 matched [SQLi Keyword 'OR']. Request rejected.";
-        rows = [];
-      } else if (sandboxMode === 'secure') {
-        statusText = "安全 (防禦模式生效)";
-        statusClass = "bg-emerald-100 text-emerald-800";
+      if (sandboxMode === 'secure') {
+        statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800";
+        statusBadge.innerText = "🛡️ 防禦模式：預編譯參數化查詢";
 
         if (scenario === 'orderby') {
-          const allowed = ["id", "username", "role"];
+          const allowed = ['id', 'username', 'role'];
           const isAllowed = allowed.includes(input.trim());
-          const finalCol = isAllowed ? input.trim() : "id";
-          sql = `SELECT id, username, role FROM users ORDER BY ${finalCol} ASC;\n/* [Backend Validation]: Whitelist checked. Param '${input}' is ${isAllowed ? 'ALLOWED' : 'REJECTED -> Defaulting to id'} */`;
-          analysisText = isAllowed 
-            ? `🛡️ <strong>白名單校驗通過：</strong> 欄位 <code>${input}</code> 於合法清單中，安全進行排序。`
-            : `🛡️ <strong>白名單校驗攔截：</strong> 輸入值 <code>${input}</code> 不在白名單內，已被自動降級為預設排序 <code>id</code>。`;
-          rows = [...mockDBUsers];
-          if (isAllowed) {
-            rows.sort((a, b) => String(a[finalCol]).localeCompare(String(b[finalCol])));
+          const safeCol = isAllowed ? input.trim() : 'id';
+          generatedSQL = `SELECT id, username, role FROM users ORDER BY ${safeCol}; [後端白名單校驗: ${isAllowed ? '通過' : '拒絕 (降級為 id)'}]`;
+          rowsToRender = [...defaultUsers];
+          if (!isAllowed && input) {
+            analysisText = `🛡️ <strong>白名單攔截生效：</strong> 輸入值 "<code>${escapeHTML(input)}</code>" 不在允許排序欄位列表中，系統自動降級以 <code>id</code> 排序，完全消除 SQLi 風險！`;
+          } else {
+            analysisText = `🛡️ <strong>白名單驗證通過：</strong> 使用合法排序欄位 <code>${safeCol}</code>。`;
           }
-          logText = `Secure Query Executed. Whitelist Check = ${isAllowed}. Returned ${rows.length} rows.`;
+        } else if (scenario === 'waf') {
+          generatedSQL = `SELECT * FROM users WHERE username = ?; -- [變數綁定值: "${input}"]`;
+          rowsToRender = defaultUsers.filter(u => u.name === input);
+          analysisText = `🛡️ <strong>防禦模式：</strong> 傳入參數被視為純字串，無論是否包含 OR/註解皆不影響 SQL 結構。`;
         } else {
-          sql = `/* Prepared Statement Compiled: */\nSELECT * FROM users WHERE username = ?;\n/* Bound Parameter [1] = ${JSON.stringify(input)} */`;
-          analysisText = `🛡️ <strong>預編譯生效中：</strong> 傳入的字串 <code>${escapeHtml(input)}</code> 被純粹當成 Username 的「值」比對，無法改變 SQL 邏輯結構。`;
-          const matched = mockDBUsers.filter(u => u.username === input);
-          rows = matched;
-          logText = `Prepared Statement Executed safely. Param count: 1. Returned ${rows.length} rows.`;
+          generatedSQL = `SELECT * FROM users WHERE username = ?; -- [綁定參數: "${input}"]`;
+          rowsToRender = defaultUsers.filter(u => u.name === input);
+          analysisText = `🛡️ <strong>預編譯安全保護中：</strong> 資料庫將輸入值綁定為純字串參數。單引號或關鍵字不會被直譯為指令！`;
         }
+
+        renderTokens(generatedSQL);
       } else {
-        statusText = "漏洞模式 (拼接危險)";
-        statusClass = "bg-red-100 text-red-800";
+        statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800";
+        statusBadge.innerText = "⚠️ 漏洞模式：動態字串拼接";
 
-        if (scenario === 'orderby') {
-          sql = `SELECT id, username, role FROM users ORDER BY ${input};`;
-          analysisText = `⚠️ <strong>ORDER BY 拼接點：</strong> 攻擊者可傳入子查詢或條件邏輯（如 <code>IF(1=1, id, username)</code>），進行盲注洩漏。`;
-          rows = [...mockDBUsers];
-          logText = `Dynamic SQL Executed: ORDER BY concatenated.`;
-        } else {
-          sql = `SELECT * FROM users WHERE username = '${input}';`;
-
-          if (scenario === 'login') {
-            if (input.includes("' OR '1'='1") || input.includes("' OR 1=1") || input.includes("admin'--")) {
-              analysisText = `💥 <strong>登入繞過成功！</strong> 注入語法強迫 WHERE 條件恆為 True，回傳了全數使用者帳號！`;
-              rows = [...mockDBUsers];
-            } else {
-              analysisText = `🔍 標準拼接測試。若輸入含有單引號未轉義，將導致語法出錯或語意變更。`;
-              rows = mockDBUsers.filter(u => u.username === input);
-            }
-          } else if (scenario === 'union') {
-            if (input.toLowerCase().includes("union select")) {
-              analysisText = `💥 <strong>UNION 跨表查詢成功！</strong> 攻擊者成功的將偽造的查詢結果疊加回傳。`;
-              rows = [
-                ...mockDBUsers,
-                { id: 99, username: 'SYSTEM_VERSION', role: 'MySQL v8.0.32-Community' },
-                { id: 100, username: 'CREDIT_CARD_NO', role: '4532-8890-1123-9981' }
-              ];
-            } else {
-              analysisText = `💡 請嘗試點擊預設 Payload，觀察 UNION 如何將額外數據併入結果。`;
-              rows = mockDBUsers.filter(u => u.username === input);
-            }
-          } else if (scenario === 'blind') {
-            if (input.includes("1=2")) {
-              analysisText = `❌ <strong>布林條件為 False：</strong> 查詢無結果（頁面可能顯示「查無資料」或空白）。`;
-              rows = [];
-            } else if (input.includes("LENGTH") || input.includes("SUBSTRING") || input.includes("1=1")) {
-              analysisText = `✅ <strong>布林條件為 True：</strong> 查詢回傳正常結果！盲注者可藉此判定猜測字元是否正確。`;
-              rows = [mockDBUsers[0]];
-            } else {
-              analysisText = `🔍 布林盲注測試：觀察回應結果有無資料即可驗證 True/False。`;
-              rows = mockDBUsers.filter(u => u.username === input);
-            }
-          } else if (scenario === 'sleep') {
-            if (input.toUpperCase().includes("SLEEP")) {
-              analysisText = `⏱️ <strong>時間延遲觸發！</strong> 資料庫收到 <code>SLEEP()</code> 指令，將延遲回應。`;
-              rows = [mockDBUsers[0]];
-              triggerSleepUI(3);
-            } else {
-              analysisText = `💡 嘗試點擊 SLEEP Payload 觀察右側進度條與計時器。`;
-              rows = mockDBUsers.filter(u => u.username === input);
-            }
-          } else if (scenario === 'waf') {
-            if (input.includes("oR") || input.includes("/**/")) {
-              analysisText = `🔓 <strong>WAF 成功繞過！</strong> 透過大小寫混淆或註解分隔，繞過簡易黑名單，SQLi 依然被執行！`;
-              rows = [...mockDBUsers];
-            } else {
-              analysisText = `🔍 WAF 繞過實驗。`;
-              rows = mockDBUsers.filter(u => u.username === input);
-            }
+        if (scenario === 'login') {
+          generatedSQL = `SELECT * FROM users WHERE username = '${input}' AND password = 'xxx';`;
+          if (input.includes("' OR '1'='1") || input.includes("' OR 1=1") || input.includes("admin'--")) {
+            isExploited = true;
+            rowsToRender = defaultUsers;
+            analysisText = `💥 <strong>攻擊成功！身分驗證已繞過：</strong> 傳入的單引號打破了原本的字串閉合，<code>OR '1'='1</code> 或註解符號強制使查詢條件恆為 True，回傳了管理員帳號資料！`;
+          } else {
+            rowsToRender = defaultUsers.filter(u => u.name === input);
+            analysisText = `ℹ️ 目前為標準輸入。嘗試點擊上方的 <code>OR 萬用語法</code> 觀察登入繞過效果。`;
           }
-          logText = `Vulnerable String Concatenation Executed. Query string constructed.`;
+        } else if (scenario === 'union') {
+          generatedSQL = `SELECT id, username, role FROM users WHERE username = '${input}';`;
+          if (input.toLowerCase().includes("union select")) {
+            isExploited = true;
+            rowsToRender = [
+              { id: 1, name: 'admin', role: 'Administrator' },
+              { id: 99, name: 'SYSTEM_DB', role: 'UNION Injected: secret_flag{SQLi_Master_2026}' }
+            ];
+            analysisText = `💥 <strong>UNION 跨表竊取成功：</strong> 利用 <code>UNION SELECT</code> 將未授權的敏感資料（如系統 Flag、雜湊值）強行附加於原查詢結果中！`;
+          } else {
+            rowsToRender = defaultUsers.filter(u => u.name === input);
+            analysisText = `ℹ️ 嘗試點擊上方的 <code>UNION 竊取密碼</code> 觀察聯合查詢成果。`;
+          }
+        } else if (scenario === 'blind') {
+          generatedSQL = `SELECT * FROM users WHERE username = '${input}';`;
+          if (input.includes("1=2")) {
+            rowsToRender = [];
+            analysisText = `🔍 <strong>布林盲注 (False 狀態)：</strong> 查詢條件結果為 False，頁面無任何資料回傳（無 Row）。`;
+          } else if (input.includes("LENGTH") || input.includes("SUBSTRING") || input.includes("1=1")) {
+            isExploited = true;
+            rowsToRender = [defaultUsers[0]];
+            analysisText = `💥 <strong>布林盲注 (True 狀態)：</strong> 構造的邏輯成立（True），頁面成功回傳資料！攻擊者可透過觀察畫面差異逐字爆破 DB 名稱。`;
+          } else {
+            rowsToRender = defaultUsers.filter(u => u.name === input);
+            analysisText = `ℹ️ 嘗試切換長度爆破或 False 條件按鈕，觀察頁面 Response 差異。`;
+          }
+        } else if (scenario === 'sleep') {
+          generatedSQL = `SELECT * FROM users WHERE username = '${input}';`;
+          if (input.toUpperCase().includes("SLEEP")) {
+            isExploited = true;
+            analysisText = `⏱️ <strong>時間延遲型盲注觸發：</strong> 觸發 <code>SLEEP(3)</code> 函數！資料庫將延遲 3 秒回應，攻擊者可藉由 Response Time 判定盲注條件是否成立。`;
+            triggerSleepProgress(3);
+          } else {
+            rowsToRender = defaultUsers.filter(u => u.name === input);
+            analysisText = `ℹ️ 點擊 <code>延遲 3 秒</code> 觀察系統計時器 responses 變化。`;
+          }
+        } else if (scenario === 'orderby') {
+          generatedSQL = `SELECT id, username, role FROM users ORDER BY ${input};`;
+          if (input.includes("IF(") || input.includes("SLEEP")) {
+            isExploited = true;
+            rowsToRender = defaultUsers;
+            analysisText = `💥 <strong>ORDER BY 盲注漏洞：</strong> ORDER BY 後方無引號包裹，直接拼接惡意 SQL 運算式可觸發高危盲注！`;
+          } else {
+            rowsToRender = defaultUsers;
+            analysisText = `ℹ️ 輸入 <code>username</code> 或 <code>role</code> 進行排序；若拼接盲注語法將產生漏洞。`;
+          }
+        } else if (scenario === 'waf') {
+          const hasBlockedOR = input.includes("OR");
+          if (hasBlockedOR) {
+            generatedSQL = `-- [WAF 攔截警告]: 檢測到非法關鍵字 "OR"！請求已封鎖。`;
+            rowsToRender = [];
+            analysisText = `🛡️ <strong>WAF 成功攔截：</strong> 簡易黑名單檢測到全大寫 <code>OR</code> 關鍵字，直接丟棄請求。`;
+            logMessage = "HTTP 403 Forbidden - WAF Rule #1002 Triggered.";
+          } else if (input.includes("oR") || input.includes("/**/")) {
+            generatedSQL = `SELECT * FROM users WHERE username = '${input}';`;
+            isExploited = true;
+            rowsToRender = defaultUsers;
+            analysisText = `💥 <strong>WAF 繞過成功 (WAF Bypass)：</strong> 利用大小寫混淆 (<code>oR</code>) 或註解符號 (<code>/**/</code>) 成功穿透簡易黑名單 WAF！`;
+          } else {
+            generatedSQL = `SELECT * FROM users WHERE username = '${input}';`;
+            rowsToRender = defaultUsers.filter(u => u.name === input);
+            analysisText = `ℹ️ 測試 WAF 黑名單過濾機制。`;
+          }
         }
+
+        renderTokens(generatedSQL);
       }
 
-      badge.textContent = `狀態：${statusText}`;
-      badge.className = `px-2.5 py-0.5 rounded-full text-xs font-bold ${statusClass}`;
-      sqlDisplay.textContent = sql;
-      analysis.innerHTML = analysisText;
-      log.textContent = logText;
-      rowCount.textContent = `Row Count: ${rows.length}`;
-
-      renderTokens(sql, tokensDisplay);
+      sqlDisplay.innerText = generatedSQL;
+      analysisDiv.innerHTML = analysisText;
+      serverLog.innerText = logMessage;
 
       dbRows.innerHTML = '';
-      if (rows.length === 0) {
-        dbRows.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400 italic">無匹配資料 (Empty Result Set)</td></tr>`;
+      rowCountSpan.innerText = `Row Count: ${rowsToRender.length}`;
+      if (rowsToRender.length === 0) {
+        dbRows.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-slate-400 font-sans italic">無查詢結果 (0 Rows returned)</td></tr>`;
       } else {
-        rows.forEach(r => {
+        rowsToRender.forEach(r => {
           const tr = document.createElement('tr');
-          tr.className = "hover:bg-slate-50";
+          tr.className = isExploited ? "bg-red-50/50 hover:bg-red-50 text-red-900" : "hover:bg-slate-50";
           tr.innerHTML = `
-            <td class="p-2.5 text-slate-500">${r.id}</td>
-            <td class="p-2.5 font-bold text-slate-800">${escapeHtml(r.username)}</td>
-            <td class="p-2.5 text-indigo-600">${escapeHtml(r.role)}</td>
+            <td class="p-2.5 font-bold">${r.id}</td>
+            <td class="p-2.5">${escapeHTML(r.name)}</td>
+            <td class="p-2.5 text-xs">${escapeHTML(r.role)}</td>
           `;
           dbRows.appendChild(tr);
         });
       }
     }
 
-    function triggerSleepUI(seconds) {
-      const bar = document.getElementById('sleep-timer-bar');
-      const countdown = document.getElementById('sleep-countdown');
+    function renderTokens(sql) {
+      const tokensDisplay = document.getElementById('sb-tokens-display');
+      tokensDisplay.innerHTML = '';
+
+      const words = sql.split(/(\s+|'[^']*'|--|;)/).filter(Boolean);
+      words.forEach(w => {
+        if (w.trim() === '') return;
+        const span = document.createElement('span');
+        const upper = w.toUpperCase().trim();
+        
+        if (['SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'UNION', 'ORDER', 'BY', 'LIKE'].includes(upper)) {
+          span.className = "px-1.5 py-0.5 rounded bg-indigo-900 text-indigo-200 text-[10px] font-bold font-mono";
+        } else if (w.startsWith("'") && w.endsWith("'")) {
+          span.className = "px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 text-[10px] font-mono border border-amber-800";
+        } else if (w.startsWith("--")) {
+          span.className = "px-1.5 py-0.5 rounded bg-slate-800 text-slate-500 text-[10px] font-mono";
+        } else {
+          span.className = "px-1.5 py-0.5 rounded bg-slate-900 text-slate-300 text-[10px] font-mono";
+        }
+        span.innerText = w;
+        tokensDisplay.appendChild(span);
+      });
+    }
+
+    function triggerSleepProgress(seconds) {
+      const timerBar = document.getElementById('sleep-timer-bar');
       const progress = document.getElementById('sleep-progress');
-      bar.classList.remove('hidden');
+      const countdown = document.getElementById('sleep-countdown');
+      
+      timerBar.classList.remove('hidden');
+      progress.style.width = '0%';
       
       let remaining = seconds;
-      countdown.textContent = remaining.toFixed(1) + 's';
-      progress.style.width = '0%';
+      countdown.innerText = `${remaining.toFixed(1)}s`;
 
-      const start = Date.now();
-      const totalMs = seconds * 1000;
+      const startTime = Date.now();
+      const duration = seconds * 1000;
 
       sleepTimer = setInterval(() => {
-        const elapsed = Date.now() - start;
-        const pct = Math.min((elapsed / totalMs) * 100, 100);
-        progress.style.width = pct + '%';
-        const left = Math.max((totalMs - elapsed) / 1000, 0);
-        countdown.textContent = left.toFixed(1) + 's';
+        const elapsed = Date.now() - startTime;
+        const pct = Math.min((elapsed / duration) * 100, 100);
+        progress.style.width = `${pct}%`;
+        
+        const left = Math.max((duration - elapsed) / 1000, 0);
+        countdown.innerText = `${left.toFixed(1)}s`;
 
-        if (elapsed >= totalMs) {
+        if (elapsed >= duration) {
           clearInterval(sleepTimer);
-          countdown.textContent = '0.0s (完成)';
+          countdown.innerText = "0.0s (完成)";
         }
       }, 50);
     }
 
-    function renderTokens(sql, container) {
-      container.innerHTML = '';
-      const tokens = sql.split(/(\s+|'[^']*'|--.*|\/\*[\s\S]*?\*\/|[(),=;])/).filter(Boolean);
-      const keywords = ["SELECT", "FROM", "WHERE", "ORDER", "BY", "UNION", "AND", "OR", "ASC", "DESC", "LIMIT"];
-
-      tokens.forEach(tok => {
-        if (!tok.trim()) return;
-        const span = document.createElement('span');
-        const upper = tok.toUpperCase();
-
-        if (keywords.includes(upper)) {
-          span.className = "px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-900 text-indigo-200 border border-indigo-700";
-        } else if (tok.startsWith("'") && tok.endsWith("'")) {
-          span.className = "px-1.5 py-0.5 rounded text-[10px] font-mono bg-amber-900/60 text-amber-200 border border-amber-700";
-        } else if (tok.startsWith("--") || tok.startsWith("/*")) {
-          span.className = "px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 italic";
-        } else if (["=", ",", ";", "(", ")"].includes(tok)) {
-          span.className = "px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300";
-        } else {
-          span.className = "px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-900 text-emerald-400 border border-slate-800";
-        }
-        span.textContent = tok;
-        container.appendChild(span);
-      });
-    }
-
-    // --- QUIZ & SCORE STORAGE LOGIC ---
+    // --- QUIZ SYSTEM LOGIC ---
     function startQuiz(e) {
       e.preventDefault();
       const cls = document.getElementById('user-class').value.trim();
       const seat = document.getElementById('user-seat').value.trim();
       const name = document.getElementById('user-name').value.trim();
 
-      if (!cls || !seat || !name) return;
+      if (!cls || !seat || !name) {
+        alert("請完整填寫班級、座號與姓名！");
+        return;
+      }
 
       currentQuizUser = { cls, seat, name };
-      document.getElementById('quiz-display-user').textContent = `${cls} - ${seat}號 ${name}`;
+      document.getElementById('quiz-display-user').innerText = `${cls} / ${seat}號 / ${name}`;
 
       const shuffled = [...questionBank].sort(() => 0.5 - Math.random());
       activeQuizQuestions = shuffled.slice(0, 10);
@@ -1044,25 +1062,25 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
 
       activeQuizQuestions.forEach((q, idx) => {
         const card = document.createElement('div');
-        card.className = "bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3";
+        card.className = "bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-3 text-xs";
         
-        let optionsHtml = '';
+        let optionsHTML = '';
         q.options.forEach((opt, optIdx) => {
-          optionsHtml += `
-            <label class="flex items-start gap-2.5 p-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer text-xs transition">
-              <input type="radio" name="quiz-q-${idx}" value="${optIdx}" class="mt-0.5 text-indigo-600 focus:ring-indigo-500">
-              <span class="text-slate-700 leading-relaxed">${escapeHtml(opt)}</span>
+          optionsHTML += `
+            <label class="flex items-center space-x-2 p-2.5 rounded-lg border border-slate-100 bg-slate-50 hover:bg-indigo-50/50 cursor-pointer transition">
+              <input type="radio" name="quiz-q-${idx}" value="${optIdx}" class="text-indigo-600 focus:ring-indigo-500">
+              <span class="text-slate-700">${escapeHTML(opt)}</span>
             </label>
           `;
         });
 
         card.innerHTML = `
-          <div class="font-bold text-slate-900 text-sm flex gap-2">
-            <span class="text-indigo-600 font-black">Q${idx + 1}.</span>
-            <span>${escapeHtml(q.question)}</span>
+          <div class="font-bold text-slate-900 text-sm flex items-start gap-2">
+            <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs">第 ${idx + 1} 題</span>
+            <span>${escapeHTML(q.question)}</span>
           </div>
-          <div class="space-y-2 pt-1">
-            ${optionsHtml}
+          <div class="space-y-1.5 pt-1">
+            ${optionsHTML}
           </div>
         `;
         container.appendChild(card);
@@ -1073,40 +1091,43 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
       let score = 0;
       let correctCount = 0;
 
-      activeQuizQuestions.forEach((q, idx) => {
-        const selected = document.querySelector(`input[name="quiz-q-${idx}"]:checked`);
-        if (selected && parseInt(selected.value) === q.answer) {
-          score += 10;
-          correctCount++;
+      for (let i = 0; i < activeQuizQuestions.length; i++) {
+        const selected = document.querySelector(`input[name="quiz-q-${i}"]:checked`);
+        if (selected) {
+          const userAns = parseInt(selected.value);
+          if (userAns === activeQuizQuestions[i].answer) {
+            correctCount++;
+            score += 10;
+          }
         }
-      });
+      }
 
-      // 儲存學生成績至 LocalStorage
-      saveScoreToStorage({
-        timestamp: new Date().toLocaleString('zh-TW', { hour12: false }),
+      const record = {
+        time: new Date().toLocaleString('zh-TW'),
         cls: currentQuizUser.cls,
         seat: currentQuizUser.seat,
         name: currentQuizUser.name,
-        correctCount: correctCount,
+        correct: correctCount,
         score: score
-      });
+      };
 
+      // 1. 同步儲存於本地快取
+      saveGradeRecord(record);
+
+      // 2. 異步傳輸至 Google 試算表 (GAS 跨裝置同步)
+      fetch(GAS_WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(record)
+      }).catch(err => console.error("GAS 雲端同步失敗:", err));
+
+      // 顯示結果頁面
       document.getElementById('quiz-window').classList.add('hidden');
       document.getElementById('quiz-result-card').classList.remove('hidden');
-
-      document.getElementById('result-user-info').textContent = `考生：${currentQuizUser.cls} - ${currentQuizUser.seat}號 ${currentQuizUser.name}`;
-      document.getElementById('result-score').textContent = score;
-      document.getElementById('result-count').textContent = correctCount;
-    }
-
-    function saveScoreToStorage(record) {
-      let records = JSON.parse(localStorage.getItem('sqli_lab_quiz_records') || '[]');
-      records.unshift(record); // 最新紀錄排最前面
-      localStorage.setItem('sqli_lab_quiz_records', JSON.stringify(records));
-    }
-
-    function getScoresFromStorage() {
-      return JSON.parse(localStorage.getItem('sqli_lab_quiz_records') || '[]');
+      document.getElementById('result-user-info').innerText = `考生：${currentQuizUser.cls} / ${currentQuizUser.seat}號 / ${currentQuizUser.name}`;
+      document.getElementById('result-score').innerText = score;
+      document.getElementById('result-count').innerText = correctCount;
     }
 
     function retakeQuiz() {
@@ -1114,140 +1135,160 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
       document.getElementById('quiz-auth-card').classList.remove('hidden');
     }
 
-    // --- TEACHER CONTROL, GRADES & SOLUTIONS LOGIC ---
-    function togglePublishAnswers() {
-      const toggle = document.getElementById('teacher-publish-toggle');
-      const label = document.getElementById('switch-status-label');
-
-      if (toggle.checked) {
-        const pwd = prompt("請輸入教師管理密碼：");
-        if (pwd === TEACHER_PASSWORD) {
-          isAnswersPublished = true;
-          label.textContent = "目前狀態：已解鎖管理權限";
-          label.className = "text-xs font-bold text-emerald-400";
-          document.getElementById('solutions-locked-msg').classList.add('hidden');
-          document.getElementById('solutions-unlocked-content').classList.remove('hidden');
-          renderGradeTable();
-          renderAllSolutions();
-        } else {
-          alert("密碼錯誤！無法解鎖管理區。");
-          toggle.checked = false;
-        }
-      } else {
-        isAnswersPublished = false;
-        label.textContent = "目前狀態：未解鎖";
-        label.className = "text-xs font-bold text-amber-400";
-        document.getElementById('solutions-locked-msg').classList.remove('hidden');
-        document.getElementById('solutions-unlocked-content').classList.add('hidden');
-      }
+    // --- GRADE BOOK & LOCALSTORAGE / GAS SYNC LOGIC ---
+    function saveGradeRecord(record) {
+      const history = JSON.parse(localStorage.getItem('sqli_grades') || '[]');
+      history.unshift(record);
+      localStorage.setItem('sqli_grades', JSON.stringify(history));
     }
 
-    // 渲染成績總表
-    function renderGradeTable() {
-      const tbody = document.getElementById('grade-table-body');
-      const badge = document.getElementById('grade-count-badge');
-      const filter = (document.getElementById('grade-search-input').value || '').toLowerCase();
-      const records = getScoresFromStorage();
+    function getGradeRecords() {
+      return JSON.parse(localStorage.getItem('sqli_grades') || '[]');
+    }
 
-      tbody.innerHTML = '';
+    async function renderGradeTable() {
+      const tbody = document.getElementById('grade-table-body');
+      const search = document.getElementById('grade-search-input').value.toLowerCase().trim();
+      
+      tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-indigo-600 font-sans">⏳ 正在從 Google 雲端載入全班成績...</td></tr>`;
+
+      let records = [];
+      try {
+        // 從 GAS 遠端讀取跨裝置全班資料
+        const res = await fetch(GAS_WEB_APP_URL);
+        records = await res.json();
+        records.reverse(); // 讓最新的成績排在最前
+      } catch (err) {
+        console.warn("無法取得 GAS 雲端成績，改讀取本機快取:", err);
+        records = getGradeRecords();
+      }
 
       const filtered = records.filter(r => 
-        r.cls.toLowerCase().includes(filter) ||
-        r.seat.toLowerCase().includes(filter) ||
-        r.name.toLowerCase().includes(filter)
+        (r.cls && r.cls.toString().toLowerCase().includes(search)) ||
+        (r.seat && r.seat.toString().toLowerCase().includes(search)) ||
+        (r.name && r.name.toString().toLowerCase().includes(search))
       );
 
-      badge.textContent = `總筆數：${filtered.length}`;
+      document.getElementById('grade-count-badge').innerText = `總筆數：${filtered.length}`;
+      tbody.innerHTML = '';
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 italic">尚無測驗成績紀錄</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 font-sans italic">尚無測驗紀錄</td></tr>`;
         return;
       }
 
       filtered.forEach(r => {
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50 transition";
-        const scoreColor = r.score >= 80 ? "text-emerald-600 font-bold" : (r.score >= 60 ? "text-indigo-600 font-bold" : "text-red-600 font-bold");
+        tr.className = "hover:bg-slate-50";
         tr.innerHTML = `
-          <td class="p-3 text-slate-400 text-[11px]">${r.timestamp}</td>
-          <td class="p-3 font-semibold text-slate-700">${escapeHtml(r.cls)}</td>
-          <td class="p-3 text-slate-700">${escapeHtml(r.seat)}</td>
-          <td class="p-3 font-bold text-slate-900">${escapeHtml(r.name)}</td>
-          <td class="p-3 text-slate-600">${r.correctCount} / 10</td>
-          <td class="p-3 ${scoreColor}">${r.score} 分</td>
+          <td class="p-3 text-slate-500 text-[11px]">${r.time}</td>
+          <td class="p-3 font-semibold text-slate-700">${escapeHTML(r.cls)}</td>
+          <td class="p-3 text-slate-700">${escapeHTML(r.seat)}</td>
+          <td class="p-3 font-bold text-slate-900">${escapeHTML(r.name)}</td>
+          <td class="p-3 text-slate-600">${r.correct} / 10</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded font-bold ${r.score >= 60 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">${r.score} 分</span></td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    // 清除成績歷史
-    function clearGradesHistory() {
-      if (confirm("確定要清除所有已記錄的學生成績嗎？此動作無法復原。")) {
-        localStorage.removeItem('sqli_lab_quiz_records');
-        renderGradeTable();
+    async function exportGradesCSV() {
+      let records = [];
+      try {
+        const res = await fetch(GAS_WEB_APP_URL);
+        records = await res.json();
+        records.reverse();
+      } catch (err) {
+        records = getGradeRecords();
       }
-    }
 
-    // 匯出 CSV Excel 檔
-    function exportGradesCSV() {
-      const records = getScoresFromStorage();
       if (records.length === 0) {
-        alert("目前尚無任何成績紀錄可供匯出！");
+        alert("目前沒有任何成績紀錄可供匯出！");
         return;
       }
 
-      // CSV Header (含 BOM 解決 Excel 亂碼)
-      let csvContent = "\uFEFF測驗時間,班級,座號,姓名,答對題數,測驗得分\n";
-
+      let csv = "\uFEFF測驗時間,班級,座號,姓名,答對題數,測驗得分\n";
       records.forEach(r => {
-        const row = [
-          `"${r.timestamp}"`,
-          `"${r.cls.replace(/"/g, '""')}"`,
-          `"${r.seat.replace(/"/g, '""')}"`,
-          `"${r.name.replace(/"/g, '""')}"`,
-          r.correctCount,
-          r.score
-        ];
-        csvContent += row.join(",") + "\n";
+        csv += `"${r.time}","${r.cls}","${r.seat}","${r.name}",${r.correct},${r.score}\n`;
       });
 
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
-      const dateStr = new Date().toISOString().slice(0, 10);
+      const url = URL.createObjectURL(blob);
       link.setAttribute("href", url);
-      link.setAttribute("download", `SQLi_Quiz_Grades_${dateStr}.csv`);
+      link.setAttribute("download", `SQLi_Quiz_Grades_${new Date().toISOString().slice(0,10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     }
 
-    function renderAllSolutions() {
+    function clearGradesHistory() {
+      if (confirm("確定要清除本機快取的紀錄嗎？（註：此操作不會刪除 Google 試算表上的雲端資料）")) {
+        localStorage.removeItem('sqli_grades');
+        renderGradeTable();
+      }
+    }
+
+    // --- TEACHER CONTROL & SOLUTIONS LOCK LOGIC ---
+    function togglePublishAnswers() {
+      const toggle = document.getElementById('teacher-publish-toggle');
+      const label = document.getElementById('switch-status-label');
+      const lockedMsg = document.getElementById('solutions-locked-msg');
+      const unlockedContent = document.getElementById('solutions-unlocked-content');
+
+      if (toggle.checked) {
+        const inputPwd = prompt("🔑 請輸入教師解鎖密碼：", "");
+        if (inputPwd === TEACHER_PASSWORD) {
+          isAnswersPublished = true;
+          label.className = "text-xs font-bold text-emerald-400";
+          label.innerText = "目前狀態：已解鎖 (已開啟權限)";
+          lockedMsg.classList.add('hidden');
+          unlockedContent.classList.remove('hidden');
+          
+          renderGradeTable();
+          renderFullQuizAnswers();
+        } else {
+          alert("❌ 密碼錯誤！無法開啟管理權限。");
+          toggle.checked = false;
+        }
+      } else {
+        isAnswersPublished = false;
+        label.className = "text-xs font-bold text-amber-400";
+        label.innerText = "目前狀態：未解鎖";
+        lockedMsg.classList.remove('hidden');
+        unlockedContent.classList.add('hidden');
+      }
+    }
+
+    function renderFullQuizAnswers() {
       const container = document.getElementById('quiz-answers-container');
       container.innerHTML = '';
 
-      questionBank.forEach((q) => {
+      questionBank.forEach((q, idx) => {
         const card = document.createElement('div');
-        card.className = "bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3 text-xs";
-
-        let optionsList = '';
-        q.options.forEach((opt, oIdx) => {
-          const isAns = oIdx === q.answer;
-          optionsList += `
-            <div class="p-2 rounded-lg font-mono ${isAns ? 'bg-emerald-50 border border-emerald-300 text-emerald-900 font-bold' : 'bg-slate-50 text-slate-600'}">
-              ${isAns ? '✅ ' : '❌ '}${escapeHtml(opt)}
+        card.className = "bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-3 text-xs";
+        
+        let optionsHTML = '';
+        q.options.forEach((opt, optIdx) => {
+          const isCorrect = optIdx === q.answer;
+          optionsHTML += `
+            <div class="p-2 rounded-lg border ${isCorrect ? 'bg-emerald-50 border-emerald-300 font-bold text-emerald-900' : 'bg-slate-50 border-slate-100 text-slate-600'}">
+              ${isCorrect ? '✅ ' : '⚪ '}${escapeHTML(opt)}
             </div>
           `;
         });
 
         card.innerHTML = `
-          <div class="font-bold text-sm text-slate-900 flex items-center gap-2">
-            <span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded text-xs font-bold">第 ${q.id} 題</span>
-            <span>${escapeHtml(q.question)}</span>
+          <div class="font-bold text-slate-900 text-sm flex items-start gap-2">
+            <span class="bg-indigo-600 text-white px-2 py-0.5 rounded text-xs">題庫第 ${q.id} 題</span>
+            <span>${escapeHTML(q.question)}</span>
           </div>
-          <div class="space-y-1.5">${optionsList}</div>
-          <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 leading-relaxed">
-            <strong>💡 詳細解析：</strong> ${escapeHtml(q.explanation)}
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+            ${optionsHTML}
+          </div>
+          <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 space-y-1 mt-2">
+            <div class="font-bold flex items-center gap-1">💡 標準答案解析：</div>
+            <p class="leading-relaxed text-[11px]">${escapeHTML(q.explanation)}</p>
           </div>
         `;
         container.appendChild(card);
@@ -1255,20 +1296,20 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
     }
 
     // --- HELPER FUNCTIONS ---
-    function escapeHtml(str) {
+    function escapeHTML(str) {
       if (!str) return '';
       return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     }
 
-    // 初始化預設沙盒載入
-    window.addEventListener('DOMContentLoaded', () => {
+    // --- INITIALIZATION ---
+    window.onload = () => {
       updatePayloadButtons();
-    });
+    };
   </script>
 </body>
 </html>
