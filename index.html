@@ -388,7 +388,7 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
         <div class="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h2 class="text-lg font-bold">🔐 教師控制台 (學生成績與解答管理)</h2>
-            <p class="text-xs text-slate-400">輸入教師管理密碼解鎖全班成績清單與隨堂測驗標準答案。</p>
+            <p class="text-xs text-slate-400">切換開關並輸入教師管理密碼，向 GAS 伺服器驗證解鎖成績清單與標準答案。</p>
           </div>
           <div class="flex items-center space-x-3">
             <span id="switch-status-label" class="text-xs font-bold text-amber-400">目前狀態：未解鎖</span>
@@ -404,7 +404,7 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
       <div id="solutions-locked-msg" class="bg-white rounded-2xl p-12 text-center text-slate-400 space-y-3 border border-slate-200">
         <div class="text-4xl">🔒</div>
         <div class="text-sm font-bold text-slate-700">管理功能尚未解鎖</div>
-        <p class="text-xs">請由授課教師於上方控制台切換開關並輸入密碼（預設：<code>teacher123</code>）。</p>
+        <p class="text-xs">請由授課教師於上方控制台切換開關並輸入驗證密碼。</p>
       </div>
 
       <!-- 解鎖後顯示內容 (成績冊 + 題庫解答) -->
@@ -420,7 +420,7 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
               <p class="text-xs text-slate-500">自動匯集各裝置學生的測驗分數，支援即時搜尋與 Excel (CSV) 匯出。</p>
             </div>
             <div class="flex items-center gap-2">
-              <button onclick="renderGradeTable()" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 rounded-lg text-xs font-semibold transition flex items-center gap-1">
+              <button onclick="fetchRemoteGrades()" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 rounded-lg text-xs font-semibold transition flex items-center gap-1">
                 🔄 重新整理雲端資料
               </button>
               <button onclick="exportGradesCSV()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm">
@@ -434,7 +434,7 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
 
           <!-- 成績表格搜尋欄 -->
           <div class="flex justify-between items-center text-xs">
-            <input type="text" id="grade-search-input" onkeyup="renderGradeTable()" placeholder="🔍 搜尋班級、座號或姓名..." class="p-2 border border-slate-300 rounded-lg w-64">
+            <input type="text" id="grade-search-input" onkeyup="renderGradeTableUI()" placeholder="🔍 搜尋班級、座號或姓名..." class="p-2 border border-slate-300 rounded-lg w-64">
             <span id="grade-count-badge" class="text-slate-500 font-mono">總筆數：0</span>
           </div>
 
@@ -484,16 +484,15 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
   <!-- JAVASCRIPT LOGIC -->
   <script>
     // --- GLOBAL CONSTANTS & CONFIG ---
-    const TEACHER_PASSWORD = "teacher123"; // 教師管理密碼
-    
     // ⚠️ 請替換為你個人部署的 Google Apps Script Web App URL
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyEisYxf4J1SoJGrPat4iewzknskJ5_F3-RKKJQczwkQl44fU3EisrmlWJ3kCfurGhiag/exec";
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/你的Deploy_ID/exec";
 
-    let isAnswersPublished = false;
+    let authenticatedTeacherPwd = ""; // 暫存通過 GAS 驗證的密碼
     let currentQuizUser = { cls: '', seat: '', name: '' };
     let activeQuizQuestions = [];
     let sandboxMode = 'vulnerable'; // 'vulnerable' | 'secure'
     let sleepTimer = null;
+    let fetchedGradesData = []; // 儲存已抓取的成績紀錄
 
     // --- 各情境專屬 Payload 資料庫 ---
     const scenarioPayloads = {
@@ -1135,35 +1134,50 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
       document.getElementById('quiz-auth-card').classList.remove('hidden');
     }
 
-    // --- GRADE BOOK & LOCALSTORAGE / GAS SYNC LOGIC ---
+    // --- LOCALSTORAGE & GAS BACKEND SYNC LOGIC ---
     function saveGradeRecord(record) {
       const history = JSON.parse(localStorage.getItem('sqli_grades') || '[]');
       history.unshift(record);
       localStorage.setItem('sqli_grades', JSON.stringify(history));
     }
 
-    function getGradeRecords() {
+    function getLocalGradeRecords() {
       return JSON.parse(localStorage.getItem('sqli_grades') || '[]');
     }
 
-    async function renderGradeTable() {
+    // 向 GAS 發送密碼驗證並抓取全班成績
+    async function fetchRemoteGrades() {
+      if (!authenticatedTeacherPwd) return;
+      
+      const tbody = document.getElementById('grade-table-body');
+      tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-indigo-600 font-sans">⏳ 正在向 GAS 伺服器驗證並同步全班成績...</td></tr>`;
+
+      try {
+        const url = `${GAS_WEB_APP_URL}?action=verifyPassword&pwd=${encodeURIComponent(authenticatedTeacherPwd)}`;
+        const res = await fetch(url);
+        const result = await res.json();
+
+        if (result.success) {
+          fetchedGradesData = result.data.reverse(); // 最新成績置頂
+          renderGradeTableUI();
+        } else {
+          alert("❌ 密碼驗證失敗！無法獲取雲端成績。");
+          fetchedGradesData = getLocalGradeRecords();
+          renderGradeTableUI();
+        }
+      } catch (err) {
+        console.warn("無法連接 GAS 伺服器，降級為讀取本機快取:", err);
+        fetchedGradesData = getLocalGradeRecords();
+        renderGradeTableUI();
+      }
+    }
+
+    // 渲染成績單 UI 表格
+    function renderGradeTableUI() {
       const tbody = document.getElementById('grade-table-body');
       const search = document.getElementById('grade-search-input').value.toLowerCase().trim();
-      
-      tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-indigo-600 font-sans">⏳ 正在從 Google 雲端載入全班成績...</td></tr>`;
 
-      let records = [];
-      try {
-        // 從 GAS 遠端讀取跨裝置全班資料
-        const res = await fetch(GAS_WEB_APP_URL);
-        records = await res.json();
-        records.reverse(); // 讓最新的成績排在最前
-      } catch (err) {
-        console.warn("無法取得 GAS 雲端成績，改讀取本機快取:", err);
-        records = getGradeRecords();
-      }
-
-      const filtered = records.filter(r => 
+      const filtered = fetchedGradesData.filter(r => 
         (r.cls && r.cls.toString().toLowerCase().includes(search)) ||
         (r.seat && r.seat.toString().toLowerCase().includes(search)) ||
         (r.name && r.name.toString().toLowerCase().includes(search))
@@ -1192,16 +1206,8 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
       });
     }
 
-    async function exportGradesCSV() {
-      let records = [];
-      try {
-        const res = await fetch(GAS_WEB_APP_URL);
-        records = await res.json();
-        records.reverse();
-      } catch (err) {
-        records = getGradeRecords();
-      }
-
+    function exportGradesCSV() {
+      const records = fetchedGradesData.length > 0 ? fetchedGradesData : getLocalGradeRecords();
       if (records.length === 0) {
         alert("目前沒有任何成績紀錄可供匯出！");
         return;
@@ -1225,34 +1231,58 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
     function clearGradesHistory() {
       if (confirm("確定要清除本機快取的紀錄嗎？（註：此操作不會刪除 Google 試算表上的雲端資料）")) {
         localStorage.removeItem('sqli_grades');
-        renderGradeTable();
+        fetchedGradesData = [];
+        renderGradeTableUI();
       }
     }
 
-    // --- TEACHER CONTROL & SOLUTIONS LOCK LOGIC ---
-    function togglePublishAnswers() {
+    // --- TEACHER CONTROL & SOLUTIONS LOCK LOGIC (GAS AUTHENTICATED) ---
+    async function togglePublishAnswers() {
       const toggle = document.getElementById('teacher-publish-toggle');
       const label = document.getElementById('switch-status-label');
       const lockedMsg = document.getElementById('solutions-locked-msg');
       const unlockedContent = document.getElementById('solutions-unlocked-content');
 
       if (toggle.checked) {
-        const inputPwd = prompt("🔑 請輸入教師解鎖密碼：", "");
-        if (inputPwd === TEACHER_PASSWORD) {
-          isAnswersPublished = true;
-          label.className = "text-xs font-bold text-emerald-400";
-          label.innerText = "目前狀態：已解鎖 (已開啟權限)";
-          lockedMsg.classList.add('hidden');
-          unlockedContent.classList.remove('hidden');
-          
-          renderGradeTable();
-          renderFullQuizAnswers();
-        } else {
-          alert("❌ 密碼錯誤！無法開啟管理權限。");
+        const inputPwd = prompt("🔑 請輸入教師管理密碼 (將送至 GAS 後端驗證)：", "");
+        if (!inputPwd) {
           toggle.checked = false;
+          return;
+        }
+
+        label.className = "text-xs font-bold text-amber-400";
+        label.innerText = "驗證中...";
+
+        try {
+          // 向 GAS 後端驗證密碼
+          const url = `${GAS_WEB_APP_URL}?action=verifyPassword&pwd=${encodeURIComponent(inputPwd)}`;
+          const res = await fetch(url);
+          const result = await res.json();
+
+          if (result.success) {
+            authenticatedTeacherPwd = inputPwd;
+            label.className = "text-xs font-bold text-emerald-400";
+            label.innerText = "目前狀態：已解鎖 (已通過 GAS 驗證)";
+            lockedMsg.classList.add('hidden');
+            unlockedContent.classList.remove('hidden');
+            
+            fetchedGradesData = result.data.reverse();
+            renderGradeTableUI();
+            renderFullQuizAnswers();
+          } else {
+            alert("❌ 密碼錯誤！GAS 伺服器拒絕存取。");
+            toggle.checked = false;
+            label.className = "text-xs font-bold text-amber-400";
+            label.innerText = "目前狀態：未解鎖";
+          }
+        } catch (err) {
+          alert("⚠️ 無法連線至 GAS 伺服器進行驗證，請檢查網路。");
+          toggle.checked = false;
+          label.className = "text-xs font-bold text-amber-400";
+          label.innerText = "目前狀態：未解鎖";
         }
       } else {
-        isAnswersPublished = false;
+        authenticatedTeacherPwd = "";
         label.className = "text-xs font-bold text-amber-400";
         label.innerText = "目前狀態：未解鎖";
         lockedMsg.classList.remove('hidden');
