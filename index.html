@@ -485,14 +485,31 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
   <script>
     // --- GLOBAL CONSTANTS & CONFIG ---
     // ⚠️ 請替換為你個人部署的 Google Apps Script Web App URL
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxLp9Ew0vED3huL9XrDfLgaUeqRmRlfQA4i6FJCmjIBu1gyMI3KwzMIngzmodLIvdsfTQ/exec";
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/你的Deploy_ID/exec";
 
-    let authenticatedTeacherPwd = ""; // 暫存通過 GAS 驗證的密碼
+    let authenticatedTeacherPwd = ""; 
     let currentQuizUser = { cls: '', seat: '', name: '' };
     let activeQuizQuestions = [];
-    let sandboxMode = 'vulnerable'; // 'vulnerable' | 'secure'
+    let sandboxMode = 'vulnerable'; 
     let sleepTimer = null;
-    let fetchedGradesData = []; // 儲存已抓取的成績紀錄
+    let fetchedGradesData = []; 
+
+    // 通用日期格式化輔助工具 (將 ISO 時間或 Date 物件轉為 "yyyy/MM/dd HH:mm:ss")
+    function formatToLocalTimeString(timeVal) {
+      if (!timeVal) return '';
+      const dateObj = new Date(timeVal);
+      if (isNaN(dateObj.getTime())) return timeVal; // 若傳入無效日期則傳回原字串
+      
+      return dateObj.toLocaleString('zh-TW', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+    }
 
     // --- 各情境專屬 Payload 資料庫 ---
     const scenarioPayloads = {
@@ -1101,8 +1118,9 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
         }
       }
 
+      // [修復點 1] 提交時將時間轉為格式化的台灣本地時間
       const record = {
-        time: new Date().toLocaleString('zh-TW'),
+        time: formatToLocalTimeString(new Date()),
         cls: currentQuizUser.cls,
         seat: currentQuizUser.seat,
         name: currentQuizUser.name,
@@ -1192,10 +1210,13 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
       }
 
       filtered.forEach(r => {
+        // [修復點 2] 渲染表格欄位時，自動將 ISO 時間或日期字串轉換為台灣本地時間
+        const formattedTimeStr = formatToLocalTimeString(r.time);
+
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50";
         tr.innerHTML = `
-          <td class="p-3 text-slate-500 text-[11px]">${r.time}</td>
+          <td class="p-3 text-slate-500 text-[11px]">${formattedTimeStr}</td>
           <td class="p-3 font-semibold text-slate-700">${escapeHTML(r.cls)}</td>
           <td class="p-3 text-slate-700">${escapeHTML(r.seat)}</td>
           <td class="p-3 font-bold text-slate-900">${escapeHTML(r.name)}</td>
@@ -1215,7 +1236,9 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
 
       let csv = "\uFEFF測驗時間,班級,座號,姓名,答對題數,測驗得分\n";
       records.forEach(r => {
-        csv += `"${r.time}","${r.cls}","${r.seat}","${r.name}",${r.correct},${r.score}\n`;
+        // [修復點 3] 匯出 CSV 時，確保時間欄位也是格式化後的台灣時間
+        const formattedTimeStr = formatToLocalTimeString(r.time);
+        csv += `"${formattedTimeStr}","${r.cls}","${r.seat}","${r.name}",${r.correct},${r.score}\n`;
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -1254,7 +1277,6 @@ query = f"SELECT * FROM users ORDER BY {sort_column}"  # 已通過白名單校�
         label.innerText = "驗證中...";
 
         try {
-          // 向 GAS 後端驗證密碼
           const url = `${GAS_WEB_APP_URL}?action=verifyPassword&pwd=${encodeURIComponent(inputPwd)}`;
           const res = await fetch(url);
           const result = await res.json();
